@@ -26,26 +26,6 @@ By combining gamification mechanics—such as interactive courses, knowledge qui
 
 ---
 
-## 🛠 Technology Stack
-
-| Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| **Frontend** | React 19 | Client-side component framework |
-| **Build Tool** | Vite | Fast frontend hot-reloading build system |
-| **Styling** | Modern Vanilla CSS | Responsive layouts, glassmorphism, & dark mode themes |
-| **Animations** | Framer Motion | Smooth 3D/360° rotation and micro-interactions |
-| **Backend** | Spring Boot 3.5 | Server-side REST API development and business logic |
-| **Security** | Spring Security | Security configurations and URL authorization constraints |
-| **Auth Token** | JWT | Secure, stateless authentication token management |
-| **Data Access** | Spring Data JPA | Object-Relational Mapping (ORM) and abstraction |
-| **ORM Engine** | Hibernate | Relational database schema mappings |
-| **Database** | MySQL 8.x | Secure relational data persistence |
-| **Build Tool (Java)**| Maven | Dependency and lifecycle management |
-| **Version Control** | Git & GitHub | Distributed version control and collaboration |
-| **API Testing** | Postman | Testing endpoints and request payloads |
-
----
-
 ## ⚙ Project Setup
 
 ### Prerequisites
@@ -121,46 +101,46 @@ Ecoversee/
 
 ## 📸 Screenshots
 
-*Below are placeholders for the primary screenshots of the application:*
+*Actual screenshots from the deployed Ecoversee application:*
 
 ### 1. Login Page
-![Login Page Mockup](https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&q=80&w=800)
+![Login Page](./screenshots/login.png)
 *Provides secure credential entry with animated visual assets.*
 
 ### 2. Dashboard
-![Dashboard Mockup](https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800)
+![Dashboard](./screenshots/dashboard.png)
 *A consolidated display showing level status, streak count, points, and weekly missions.*
 
 ### 3. Course Page
-![Course Page Mockup](https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800)
+![Course Page](./screenshots/courses.png)
 *Interactive learning modules featuring topic-based chapters and quizzes.*
 
 ### 4. Virtual Tree
-![Virtual Tree Mockup](https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&q=80&w=800)
+![Virtual Tree](./screenshots/dashboard.png)
 *Shows tree development in 3D rotation, with water, fertilize, and sunlight trivia actions.*
 
 ### 5. Reward Shop
-![Reward Shop Mockup](https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&q=80&w=800)
+![Reward Shop](./screenshots/shop.png)
 *Virtual items purchase area for buying seeds, decorations, and garden assets.*
 
 ### 6. Weekly Challenges
-![Weekly Challenges Mockup](https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=800)
+![Weekly Challenges](./screenshots/dashboard.png)
 *Real-world logging section featuring image verification upload panels and ticking locks.*
 
 ### 7. Community Forum
-![Community Forum Mockup](https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800)
+![Community Forum](./screenshots/dashboard.png)
 *A platform to publish posts, upload images, comment on sustainability discussions, and interact.*
 
 ### 8. Leaderboard
-![Leaderboard Mockup](https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800)
+![Leaderboard](./screenshots/dashboard.png)
 *User rank listings displaying top performers based on experience point accumulations.*
 
 ### 9. Certificate
-![Certificate Mockup](https://images.unsplash.com/photo-1589330694653-ded6df03f754?auto=format&fit=crop&q=80&w=800)
+![Certificate](./screenshots/certificate.png)
 *Custom generated PDF certificate showing completion signatures and course metadata.*
 
 ### 10. Admin Dashboard
-![Admin Dashboard Mockup](https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&q=80&w=800)
+![Admin Dashboard](./screenshots/dashboard.png)
 *Administrative controls allowing course and quiz modifications via interactive step wizards.*
 
 ---
