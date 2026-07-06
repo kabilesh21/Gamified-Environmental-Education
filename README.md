@@ -1,0 +1,186 @@
+# 🌱 Ecoversee: Gamified Environmental Education Platform 🌍
+
+> A feature-rich, full-stack application designed to educate, engage, and empower individuals to adopt sustainable habits through interactive learning and virtual gardening.
+
+---
+
+## ✨ Overview
+
+**Ecoversee** is a gamified environmental education web platform that bridges the gap between learning about sustainability and taking real-world action. Users earn **Eco Points** by completing interactive courses and passing knowledge quizzes. These points can be spent in the **Reward Shop** to buy virtual plants, seeds, and decorations for their personalized **Eco-Garden**. The platform also features weekly environmental missions to encourage real-life eco-friendly habits, a global leaderboard to compete with friends, community forums to share ideas, and downloadable verified certificates.
+
+---
+
+## 🚀 Key Features
+
+### 🔐 1. Authentication & Security
+* **Secure Access:** User registration, login, and JWT-based authentication.
+* **OTP Verification:** Secure verification during sign-up and password reset via emails.
+* **Role-Based Control:** Admin dashboard access restricted to administrator accounts.
+
+### 🎓 2. Interactive Learning Modules
+* **Eco-Courses:** Informative, structured courses covering climate action, renewable energy, waste management, and more.
+* **Knowledge Checks:** Interactive quizzes at the end of each lesson to lock in knowledge.
+* **XP & Eco-Points:** Earn rewards for every correct quiz answer and lesson completed.
+
+### 🏆 3. Verified Eco-Certificates
+* **Earn Certifications:** Get awarded formal certificates upon successful completion of courses.
+* **Downloadable PDF:** Instantly generate and download PDF certificates locally using HTML Canvas.
+
+### 🏡 4. Personalized Eco-Garden
+* **Virtual Ecosystem:** Grow a digital tree that matures as you earn XP.
+* **Customize & Decorate:** Place, move, and design your digital garden with items purchased from the shop.
+
+### 🛒 5. Reward Shop
+* **Spend Eco-Points:** Buy seeds, plants, solar panels, compost bins, and other decorative assets.
+* **Gamified Progression:** Unlock premium items as your Eco-level increases.
+
+### 📅 6. Weekly Missions & Challenges
+* **Real-world Impact:** Participate in off-screen missions like "Plant a Sapling," "Zero Waste Day," or "Meat-free Monday."
+* **Proof Uploads:** Upload progress/proof to complete tasks and claim premium rewards.
+
+### 📊 7. Leaderboards & Community
+* **Eco-Warrior Standings:** Compete globally on the XP leaderboard.
+* **Community Forums:** Share sustainability tips, post pictures of your real-life garden, and discuss ideas.
+
+### 🤖 8. AI Eco-Assistant
+* **Interactive Chat:** Ask the virtual environmental assistant questions about ecology, climate science, or recycling tips.
+
+### 🛡️ 9. Admin Control Panel
+* **Complete Management:** Modify courses, lessons, quizzes, weekly missions, and shop items directly from the UI.
+* **Auditing:** Monitor user activity and system stats.
+
+---
+
+## 🛠️ Technology Stack
+
+### 💻 Frontend (Client)
+* **Framework:** React 19
+* **Build Tool:** Vite
+* **Styling:** Custom Modern Vanilla CSS (Sleek card designs, glassmorphism, responsive grids)
+* **Animations:** Framer Motion
+* **Icons:** Lucide React
+* **PDF Generation:** `jspdf` & `html2canvas`
+* **HTTP Client:** Axios
+
+### ⚙️ Backend (Server)
+* **Framework:** Spring Boot 3.5.16 (Java 17)
+* **Security:** Spring Security (JWT-based token validation)
+* **Data Access:** Spring Data JPA / Hibernate
+* **Database:** MySQL 8.x
+* **Mailing:** Spring Boot Starter Mail (OTP and Password Reset)
+
+---
+
+## ⚙️ Project Setup & Installation
+
+### 📋 Prerequisites
+Make sure you have the following installed:
+* [Java Development Kit (JDK) 17+](https://adoptium.net/)
+* [Node.js (v18+) & npm](https://nodejs.org/)
+* [MySQL Community Server](https://dev.mysql.com/downloads/mysql/)
+* Maven (Optional, maven wrapper `mvnw` is included in the project)
+
+---
+
+### 🗄️ Database Setup
+1. Start your local MySQL service.
+2. The application is configured to automatically create the database `gamified_environmental_education` if it doesn't exist.
+3. Ensure database credentials in `backend/src/main/resources/application.properties` match your local setup:
+   ```properties
+   spring.datasource.url=jdbc:mysql://localhost:3306/gamified_environmental_education?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+   spring.datasource.username=your_mysql_username
+   spring.datasource.password=your_mysql_password
+   ```
+
+---
+
+### 📧 Mail Setup (For OTPs & Password Recovery)
+The backend is set up to send OTP verification codes via SMTP (Gmail example configured). You can configure your own credentials in `backend/src/main/resources/application.properties`:
+```properties
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email@gmail.com
+spring.mail.password=your_app_password
+```
+*(Note: For Gmail, use an **App Password** instead of your primary password).*
+
+---
+
+### 🚀 Running the Project
+
+#### 🛠️ Option 1: Using the Launcher (Windows)
+If you are on Windows, simply double-click the `run_project.bat` script in the root directory. This launcher script will:
+1. Check and terminate any processes holding ports `8080` (Backend) and `5173` (Frontend).
+2. Start the Spring Boot backend server in a new command window.
+3. Start the React/Vite development server in a second command window.
+4. Open your default browser to `http://localhost:5173`.
+
+#### 💻 Option 2: Manual Start
+
+**1. Start the Backend Server:**
+```bash
+cd backend
+# On Windows:
+mvnw.cmd spring-boot:run
+# On Linux/macOS:
+./mvnw spring-boot:run
+```
+The backend server runs on `http://localhost:8080`.
+
+**2. Start the Frontend Client:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+The frontend dev server will launch on `http://localhost:5173`.
+
+---
+
+## 📁 Directory Structure
+
+```text
+Ecoversee/
+├── backend/                  # Spring Boot Maven Project
+│   ├── src/main/java/        # Java Source Files
+│   │   └── com/ecoverse/demo/
+│   │       ├── controller/   # REST Controllers (API Endpoints)
+│   │       ├── dto/          # Data Transfer Objects
+│   │       ├── entity/       # JPA Entities / Database Schema
+│   │       ├── repository/   # JPA Repositories
+│   │       ├── security/     # JWT & Spring Security Configuration
+│   │       ├── service/      # Business Logic Services
+│   │       └── util/         # Utility Helper Classes
+│   ├── src/main/resources/   # Application properties & assets
+│   └── pom.xml               # Maven configuration & dependencies
+│
+├── frontend/                 # React Vite Project
+│   ├── src/
+│   │   ├── components/       # Reusable React components (Sidebar, Navbar, AI Assistant)
+│   │   ├── context/          # Auth context and states
+│   │   ├── pages/            # Application views (Dashboard, Garden, Shop, Leaderboards)
+│   │   ├── App.jsx           # Main routing & application layout
+│   │   ├── index.css         # Styling system & global styles
+│   │   └── main.jsx          # Entry point
+│   ├── package.json          # Frontend packages & dev scripts
+│   └── vite.config.js        # Vite configurations
+│
+└── run_project.bat           # Quick launcher script (Windows)
+```
+
+---
+
+## 💚 Contributing
+We welcome contributions to make Ecoversee even better! Feel free to:
+1. Fork the Repository.
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the Branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
+
+---
+
+## 📄 License
+This project is open-source. See the respective folder configurations for details.
+
+*Let's build a greener future together!* 🌲🌻🌞
