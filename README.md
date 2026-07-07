@@ -1,107 +1,78 @@
-# 🌱 Ecoversee – Gamified Environmental Education Platform
+# 🌱 Ecoverse: Gamified Environmental Education Platform 🌍
+
+A feature-rich, full-stack application designed to educate, engage, and empower individuals to adopt sustainable habits through interactive learning and virtual gardening.
+
+---
 
 ## 📖 Overview
-
-**Ecoversee** is a comprehensive, full-stack gamified web application designed to foster environmental awareness and promote sustainable lifestyle habits. Developed using React for a modern frontend interface, Spring Boot for a robust and secure backend service, and MySQL for relational data persistence, the platform bridges the gap between theoretical environmental education and real-world ecological actions.
-
-By combining gamification mechanics—such as interactive courses, knowledge quizzes, virtual tree cultivation, and collectible badges—with practical weekly challenges and community engagement forums, Ecoversee motivates users to learn about climate change, resource management, and biodiversity. The system includes downloadable verified certificates, a virtual rewards shop, and a administrative dashboard for course management, making it an engaging educational toolkit.
+Ecoverse is a gamified environmental education web platform that bridges the gap between learning about sustainability and taking real-world action. Users earn Eco Points by completing interactive courses and passing knowledge quizzes. These points can be spent in the Reward Shop to buy virtual plants, seeds, and decorations for their personalized Eco-Garden. The platform also features weekly environmental missions to encourage real-life eco-friendly habits, a global leaderboard to compete with friends, community forums to share ideas, and downloadable verified certificates.
 
 ---
 
 ## 🚀 Key Features
 
-* **🔐 User Authentication:** Secure register, login, and JWT-based session management, completed with email-based OTP verification for account setup and password recovery.
-* **🎓 Interactive Environmental Courses:** Educational course modules covering solar energy, recycling, water conservation, and biodiversity.
-* **📝 Quizzes with XP & Eco Points:** Interactive knowledge checks at the end of each module. Answering questions correctly rewards users with Experience Points (XP) and Eco Coins.
-* **🏆 Badge & Achievement System:** Collectible digital achievements and milestones unlocked as users level up and complete green tasks.
-* **🌳 Virtual Tree Growth:** A personalized digital tree that grows interactively in 3D (with 360° controls) as users gain overall XP on the platform.
-* **🏡 Eco Garden Customization:** A customizable personal digital reserve where users can place flowers, ponds, compost bins, and wildlife.
-* **🛒 Reward Shop:** A virtual store where users can spend their earned Eco Coins to buy new digital plants and garden accessories.
-* **📅 Weekly Challenges:** Practical real-world challenges (e.g. Tree Plantation Drive, Plastic-Free Week) with image upload proof verification and a 24-hour rate limit lock.
-* **📊 Leaderboard:** A global ranking system displaying the standings of all Eco-Warriors based on their total earned XP.
-* **💬 Community Forum:** A social space for users to share ecological tips, post pictures of real-life green actions, and discuss environmental ideas.
-* **🤖 AI Eco Assistant:** An interactive, AI-powered chat helper capable of answering environmental and sustainability questions in real-time.
-* **📄 Downloadable Certificates:** Verified course completion certificates dynamically generated on the client side using HTML Canvas and downloadable as PDFs.
-* **🛡️ Admin Dashboard:** A course management console for administrators and staff to add, edit, or delete courses, manage quizzes, audit user logs, and track weekly mission statuses.
+### 🔐 1. Authentication & Security
+* **Secure Access:** User registration, login, and JWT-based authentication.
+* **OTP Verification:** Secure verification during sign-up and password reset via emails.
+* **Role-Based Control:** Admin dashboard access restricted to administrator accounts.
+
+### 🎓 2. Interactive Learning Modules
+* **Eco-Courses:** Informative, structured courses covering climate action, renewable energy, waste management, and more.
+* **Knowledge Checks:** Interactive quizzes at the end of each lesson to lock in knowledge.
+* **XP & Eco-Points:** Earn rewards for every correct quiz answer and lesson completed.
+
+### 🏆 3. Verified Eco-Certificates
+* **Earn Certifications:** Get awarded formal certificates upon successful completion of courses.
+* **Downloadable PDF:** Instantly generate and download PDF certificates locally using HTML Canvas.
+
+### 🏡 4. Personalized Eco-Garden
+* **Virtual Ecosystem:** Grow a digital tree that matures as you earn XP.
+* **Customize & Decorate:** Place, move, and design your digital garden with items purchased from the shop.
+
+### 🛒 5. Reward Shop
+* **Spend Eco-Points:** Buy seeds, plants, solar panels, compost bins, and other decorative assets.
+* **Gamified Progression:** Unlock premium items as your Eco-level increases.
+
+### 📅 6. Weekly Missions & Challenges
+* **Real-world Impact:** Participate in off-screen missions like "Plant a Sapling," "Zero Waste Day," or "Meat-free Monday."
+* **Proof Uploads:** Upload progress/proof to complete tasks and claim premium rewards.
+
+### 📊 7. Leaderboards & Community
+* **Eco-Warrior Standings:** Compete globally on the XP leaderboard.
+* **Community Forums:** Share sustainability tips, post pictures of your real-life garden, and discuss ideas.
+
+### 🤖 8. AI Eco-Assistant
+* **Interactive Chat:** Ask the virtual environmental assistant questions about ecology, climate science, or recycling tips.
+
+### 🛡️ 9. Admin Control Panel
+* **Complete Management:** Modify courses, lessons, quizzes, weekly missions, and shop items directly from the UI.
+* **Auditing:** Monitor user activity and system stats.
 
 ---
 
-## ⚙ Project Setup
+## 🛠️ Technology Stack
 
-### Prerequisites
-Make sure you have the following installed on your system:
-* **Java Development Kit (JDK) 17+**
-* **Node.js (v18+) & npm**
-* **MySQL Community Server**
-* **Git**
+### 💻 Frontend (Client)
+* **Framework:** React 19
+* **Build Tool:** Vite
+* **Styling:** Custom Modern Vanilla CSS (Sleek card designs, glassmorphism, responsive grids)
+* **Animations:** Framer Motion
+* **Icons:** Lucide React
+* **PDF Generation:** `jspdf` & `html2canvas`
+* **HTTP Client:** Axios
 
----
-
-### Backend Setup
-1. Open your MySQL client and create a database named `gamified_environmental_education`:
-   ```sql
-   CREATE DATABASE gamified_environmental_education;
-   ```
-2. Navigate to `backend/src/main/resources/application.properties` and update the database credentials to match your local setup:
-   ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/gamified_environmental_education?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-   spring.datasource.username=YOUR_MYSQL_USERNAME
-   spring.datasource.password=YOUR_MYSQL_PASSWORD
-   ```
-3. Update your Gmail SMTP properties for OTP delivery:
-   ```properties
-   spring.mail.username=your_email@gmail.com
-   spring.mail.password=your_app_password
-   ```
-4. Run the Spring Boot application from the backend directory:
-   ```bash
-   cd backend
-   # Windows:
-   mvnw.cmd spring-boot:run
-   # macOS/Linux:
-   ./mvnw spring-boot:run
-   ```
-The backend server runs on `http://localhost:8080`.
-
----
-
-### Frontend Setup
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install the package dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Vite React development server:
-   ```bash
-   npm run dev
-   ```
-The frontend dev server runs on `http://localhost:5173`.
-
----
-
-### Run Using Batch File
-For convenience on Windows machines, you can automate starting both servers by double-clicking the `run_project.bat` file located in the project root. This launcher automatically manages port checks, compiles resources, and opens the application in your default web browser.
-
----
-
-## 📁 Project Structure
-
-```text
-Ecoversee/
-├── backend/                  # Spring Boot backend source files & Maven setup
-├── frontend/                 # React frontend source files, styles, & assets
-├── README.md                 # Project documentation & configuration guide
-└── run_project.bat           # Automated launch utility script (Windows)
-```
+### ⚙️ Backend (Server)
+* **Framework:** Spring Boot 3.5.16 (Java 17)
+* **Security:** Spring Security (JWT-based token validation)
+* **Data Access:** Spring Data JPA / Hibernate
+* **Database:** MySQL 8.x
+* **Mailing:** Spring Boot Starter Mail (OTP and Password Reset)
 
 ---
 
 ## 📸 Screenshots
 
-*Actual screenshots from the deployed Ecoversee application:*
+*Actual screenshots from the deployed Ecoverse application:*
 
 ### 1. Login Page
 ![Login Page](./screenshots/login.png)
@@ -145,21 +116,52 @@ Ecoversee/
 
 ---
 
-## 🎯 Future Enhancements
+## 📁 Directory Structure
 
-* 📱 **Mobile Application:** Porting the platform to React Native for native Android and iOS compatibility.
-* 🤖 **AI-Powered Personalized Learning:** Automatically recommending customized course pathways based on quiz performance and user history.
-* 🔔 **Real-Time Push Notifications:** Instant updates for community forum comments, leaderboard shifts, and new seasonal challenges.
-* 🔑 **Social OAuth Integration:** Sign-in support using Google, GitHub, and Facebook for seamless user onboarding.
-* ⚔️ **Multiplayer Environmental Events:** Co-operative events where teams of users complete combined goals (e.g. planting 1000 virtual trees together).
+```text
+Ecoversee/
+├── backend/                  # Spring Boot Maven Project
+│   ├── src/main/java/        # Java Source Files
+│   │   └── com/ecoverse/demo/
+│   │       ├── controller/   # REST Controllers (API Endpoints)
+│   │       ├── dto/          # Data Transfer Objects
+│   │       ├── entity/       # JPA Entities / Database Schema
+│   │       ├── repository/   # JPA Repositories
+│   │       ├── security/     # JWT & Spring Security Configuration
+│   │       ├── service/      # Business Logic Services
+│   │       └── util/         # Utility Helper Classes
+│   ├── src/main/resources/   # Application properties & assets
+│   └── pom.xml               # Maven configuration & dependencies
+│
+├── frontend/                 # React Vite Project
+│   ├── src/
+│   │   ├── components/       # Reusable React components (Sidebar, Navbar, AI Assistant)
+│   │   ├── context/          # Auth context and states
+│   │   ├── pages/            # Application views (Dashboard, Garden, Shop, Leaderboards)
+│   │   ├── App.jsx           # Main routing & application layout
+│   │   ├── index.css         # Styling system & global styles
+│   │   └── main.jsx          # Entry point
+│   ├── package.json          # Frontend packages & dev scripts
+│   └── vite.config.js        # Vite configurations
+│
+└── run_project.bat           # Quick launcher script (Windows)
+```
 
 ---
 
-## 👨‍💻 Developer
+## 💚 Contributing
+We welcome contributions to make Ecoversee even better! Feel free to:
+1. Fork the Repository.
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the Branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
 
-* **Name:** Kabilesh M
-* **Register Number:** 922524205066
-* **Project:** Ecoversee – Gamified Environmental Education Platform
-* **Frontend:** React + Vite
-* **Backend:** Spring Boot
-* **Database:** MySQL
+---
+
+## 📄 License
+This project is open-source. See the respective folder configurations for details.
+
+---
+
+*Let's build a greener future together!* 🌲🌻🌞
