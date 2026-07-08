@@ -159,6 +159,48 @@ public class DataInitializer implements CommandLineRunner {
 
     private void seedCoursesAndQuizzes() {
         if (courseRepository.count() > 0) {
+            java.util.List<Course> existingCourses = courseRepository.findAll();
+            for (Course course : existingCourses) {
+                switch (course.getTitle()) {
+                    case "Water Conservation Tips":
+                        course.setImageUrl("https://images.unsplash.com/photo-1488330890490-c291ecf62571?w=600");
+                        break;
+                    case "Air Pollution & Smog":
+                        course.setImageUrl("https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=600");
+                        break;
+                    case "Geothermal Energy Intro":
+                        course.setImageUrl("https://images.unsplash.com/photo-1548678684-25bf784a9e52?w=600");
+                        break;
+                    case "Biomass & Biofuels":
+                        course.setImageUrl("https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?w=600");
+                        break;
+                    case "Green Building Materials":
+                        course.setImageUrl("https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=600");
+                        break;
+                    case "Biodiversity & Food Webs":
+                        course.setImageUrl("https://images.unsplash.com/photo-1535268647977-a403b69fc757?w=600");
+                        break;
+                    case "Soil Erosion Control":
+                        course.setImageUrl("https://images.unsplash.com/photo-1508873696983-2df519f0397e?w=600");
+                        break;
+                    case "Carbon Capture Tech":
+                        course.setImageUrl("https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600");
+                        break;
+                    case "Hydropower & Water Energy":
+                        course.setImageUrl("https://images.unsplash.com/photo-1469041797191-50ace28483c3?w=600");
+                        break;
+                    case "Introduction to Recycling":
+                        course.setImageUrl("https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=600");
+                        break;
+                    case "Single-Use Plastics":
+                        course.setImageUrl("https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=600");
+                        break;
+                    case "Glacier Melting & Climate":
+                        course.setImageUrl("https://images.unsplash.com/photo-1516908205727-40afad9449a8?w=600");
+                        break;
+                }
+                courseRepository.save(course);
+            }
             return;
         }
 
