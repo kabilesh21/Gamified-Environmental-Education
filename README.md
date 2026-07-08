@@ -86,33 +86,9 @@ Ecoverse is a gamified environmental education web platform that bridges the gap
 ![Course Page](./screenshots/courses.png)
 *Interactive learning modules featuring topic-based chapters and quizzes.*
 
-### 4. Virtual Tree
-![Virtual Tree](./screenshots/dashboard.png)
-*Shows tree development in 3D rotation, with water, fertilize, and sunlight trivia actions.*
-
-### 5. Reward Shop
-![Reward Shop](./screenshots/shop.png)
-*Virtual items purchase area for buying seeds, decorations, and garden assets.*
-
-### 6. Weekly Challenges
-![Weekly Challenges](./screenshots/dashboard.png)
-*Real-world logging section featuring image verification upload panels and ticking locks.*
-
-### 7. Community Forum
-![Community Forum](./screenshots/dashboard.png)
-*A platform to publish posts, upload images, comment on sustainability discussions, and interact.*
-
-### 8. Leaderboard
-![Leaderboard](./screenshots/dashboard.png)
-*User rank listings displaying top performers based on experience point accumulations.*
-
-### 9. Certificate
+### 4. Certificate
 ![Certificate](./screenshots/certificate.png)
 *Custom generated PDF certificate showing completion signatures and course metadata.*
-
-### 10. Admin Dashboard
-![Admin Dashboard](./screenshots/dashboard.png)
-*Administrative controls allowing course and quiz modifications via interactive step wizards.*
 
 ---
 
