@@ -123,21 +123,4 @@ Ecoversee/
 └── run_project.bat           # Quick launcher script (Windows)
 ```
 
----
-
-## 💚 Contributing
-We welcome contributions to make Ecoversee even better! Feel free to:
-1. Fork the Repository.
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the Branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
-
----
-
-## 📄 License
-This project is open-source. See the respective folder configurations for details.
-
----
-
 *Let's build a greener future together!* 🌲🌻🌞
