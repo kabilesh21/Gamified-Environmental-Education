@@ -85,7 +85,7 @@ export default function Login() {
           `}</style>
           <img 
             src="/logo_icon.png" 
-            alt="EcoVerse Logo" 
+            alt="Greenizo Logo" 
             style={{
               ...styles.sproutGif,
               width: '42px',
@@ -93,7 +93,7 @@ export default function Login() {
               animation: 'swayLogo 2.5s ease-in-out infinite alternate'
             }}
           />
-          <h1 style={styles.brandTitle}>ECOVERSE</h1>
+          <h1 style={styles.brandTitle}>GREENIZO</h1>
         </div>
 
         <div style={styles.cardHeader}>

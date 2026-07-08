@@ -8,7 +8,7 @@ export default function AiAssistant() {
     {
       id: 1,
       sender: 'bot',
-      text: "Hello! I am EcoBot, your Ecoversee AI learning assistant. Ask me anything about environmental preservation, carbon footprints, or how to navigate our platform!",
+      text: "Hello! I am EcoBot, your Greenizo AI learning assistant. Ask me anything about environmental preservation, carbon footprints, or how to navigate our platform!",
     },
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -76,7 +76,7 @@ export default function AiAssistant() {
       return "Biomass and biofuels use organic matter (like agricultural waste and algae) to generate clean electricity or liquid fuels. Since plants absorb CO2 as they grow, biomass can be part of a carbon-neutral circular economy! 🌾🔋";
     }
     if (q.includes('carbon') || q.includes('footprint') || q.includes('emissions') || q.includes('co2')) {
-      return "Your carbon footprint is the total amount of greenhouse gases you emit from daily activities. Use the Dashboard Estimator in Ecoversee to count yours, and try to lower it by eating plant-rich foods, switching off standby power, and choosing sustainable transit! 📊🌍";
+      return "Your carbon footprint is the total amount of greenhouse gases you emit from daily activities. Use the Dashboard Estimator in Greenizo to count yours, and try to lower it by eating plant-rich foods, switching off standby power, and choosing sustainable transit! 📊🌍";
     }
     if (q.includes('garden') || q.includes('flower') || q.includes('animal') || q.includes('windmill') || q.includes('pond')) {
       return "Our Eco Garden is a direct reflection of your environmental achievements! 🌸 As you complete lessons and quizzes, you earn coins to purchase trees, flowers, decorations, and wind/solar gadgets. Place them on your canvas to design a beautiful, sustainable dream reserve! 🌳✨";
@@ -101,7 +101,7 @@ export default function AiAssistant() {
     const keywords = words.filter(w => w.length > 3 && !stopWords.has(w.toLowerCase()));
     const subject = keywords.length > 0 ? keywords.join(" ") : "this sustainability topic";
 
-    return `WHOA! That is an absolutely brilliant and fascinating question about "${subject}"! 🌍✨ As your Ecoversee AI assistant, I am positively bubbling with excitement to discuss this!
+    return `WHOA! That is an absolutely brilliant and fascinating question about "${subject}"! 🌍✨ As your Greenizo AI assistant, I am positively bubbling with excitement to discuss this!
 
 While I'm constantly loading new scientific databases, here is an awesome eco-friendly perspective: when it comes to "${subject}", the golden rule is always to look for ways to reduce waste, respect natural ecosystems, and promote renewable options! 🌿💚
 

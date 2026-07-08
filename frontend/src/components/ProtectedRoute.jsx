@@ -8,7 +8,7 @@ export default function ProtectedRoute({ children }) {
 
   if (loading) {
     // If context is still fetching token, render a static loading view
-    return <div style={styles.loading}>Connecting to Ecoversee...</div>;
+    return <div style={styles.loading}>Connecting to Greenizo...</div>;
   }
 
   if (!user) {

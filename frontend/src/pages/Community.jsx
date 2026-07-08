@@ -78,7 +78,7 @@ export default function Community() {
       <div style={styles.header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MessageSquare size={28} color="#2e7d32" />
-          <h1 style={styles.title}>ECOVERSE Community</h1>
+          <h1 style={styles.title}>GREENIZO Community</h1>
         </div>
         <p style={styles.subtitle}>Connect with fellow environmentalists, discuss eco-tips, and share your sustainability updates.</p>
       </div>

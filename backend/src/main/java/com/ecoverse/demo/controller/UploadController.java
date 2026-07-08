@@ -33,7 +33,7 @@ public class UploadController {
             Path filePath = uploadDir.resolve(fileName);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            String fileUrl = "http://localhost:8080/uploads/" + fileName;
+            String fileUrl = "http://127.0.0.1:8080/uploads/" + fileName;
             return ResponseEntity.ok(Map.of("url", fileUrl));
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body("Failed to upload file: " + e.getMessage());

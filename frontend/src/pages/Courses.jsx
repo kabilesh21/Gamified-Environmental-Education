@@ -298,7 +298,7 @@ export default function Courses() {
       <div style={styles.container}>
         <div style={styles.header}>
           <h1 style={styles.title}>{isEditMode ? "Edit Eco Course" : "Create Eco Course"}</h1>
-          <p style={styles.subtitle}>{isEditMode ? "Modify course parameters, manuals, and evaluation choices." : "Construct a new educational course, lessons, and quizzes for all Ecoverse users."}</p>
+          <p style={styles.subtitle}>{isEditMode ? "Modify course parameters, manuals, and evaluation choices." : "Construct a new educational course, lessons, and quizzes for all Greenizo users."}</p>
         </div>
 
         <div style={styles.wizardCard}>
@@ -621,7 +621,15 @@ export default function Courses() {
           >
             {/* Image section with completion overlay */}
             <div style={styles.imageWrapper}>
-              <img src={course.imageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600'} alt={course.title} style={styles.image} />
+              <img 
+                src={course.imageUrl && course.imageUrl.trim() ? course.imageUrl : 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600'} 
+                alt={course.title} 
+                style={styles.image} 
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600';
+                }}
+              />
               {course.completed && (
                 <div style={styles.completedOverlay}>
                   <CheckCircle2 size={36} color="#FFFFFF" />

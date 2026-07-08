@@ -95,7 +95,7 @@ export default function Settings() {
 
     // Simulate sending support request
     setTimeout(() => {
-      setSupportSuccess('Support query sent! The Ecoversee board will reply within 24 hours.');
+      setSupportSuccess('Support query sent! The Greenizo board will reply within 24 hours.');
       setSupportMsg('');
     }, 800);
   };
@@ -300,7 +300,7 @@ export default function Settings() {
           </AnimatePresence>
 
           <p style={styles.supportDesc}>
-            Encountered any technical issues? Have ideas to improve gamification? Send a message to the Ecoversee administrators!
+            Encountered any technical issues? Have ideas to improve gamification? Send a message to the Greenizo administrators!
           </p>
 
           <form onSubmit={handleSupportSubmit} style={styles.form}>

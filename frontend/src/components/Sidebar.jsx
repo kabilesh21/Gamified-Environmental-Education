@@ -19,7 +19,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <div style={styles.logoCircle}>
             <Leaf size={16} color="#FFFFFF" fill="#FFFFFF" />
           </div>
-          <span style={styles.brandName}>ECOVERSE</span>
+          <span style={styles.brandName}>GREENIZO</span>
         </div>
         <button onClick={onClose} style={styles.toggleBtn} title="Close Sidebar">
           <Menu size={20} color="#1b4d2c" />

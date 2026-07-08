@@ -79,7 +79,7 @@ export default function Signup() {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <div style={styles.cardHeader}>
-          <h2>Join Ecoversee</h2>
+          <h2>Join Greenizo</h2>
           <p>Start learning, playing, and protecting our environment</p>
         </div>
 

@@ -17,12 +17,12 @@ public class EmailService {
 
     private static final String BREVO_API_KEY = System.getenv("BREVO_API_KEY");
     private static final String SENDER_EMAIL = "postmanmail21@gmail.com";
-    private static final String SENDER_NAME = "Ecoversee Team";
+    private static final String SENDER_NAME = "Greenizo Team";
 
     @Async
     public void sendOtpEmail(String toEmail, String otp) {
-        String subject = "Ecoversee Verification Code: " + otp;
-        String content = "Welcome to Ecoversee - Your Gamified Environmental Education Platform!\n\n" +
+        String subject = "Greenizo Verification Code: " + otp;
+        String content = "Welcome to Greenizo - Your Gamified Environmental Education Platform!\n\n" +
                 "Thank you for joining our community to help protect the environment, learn sustainability, and build your virtual eco garden.\n\n" +
                 "Your 6-digit One-Time Password (OTP) for account verification / password recovery is:\n" +
                 "-----------------------------------------\n" +
@@ -32,7 +32,7 @@ public class EmailService {
                 "This OTP is valid for 5 minutes and should not be shared with anyone for security reasons.\n\n" +
                 "Let's make the planet greener together!\n\n" +
                 "Best regards,\n" +
-                "The Ecoversee Team";
+                "The Greenizo Team";
 
         try {
             URL url = new URL("https://api.brevo.com/v3/smtp/email");
@@ -41,6 +41,8 @@ public class EmailService {
             conn.setRequestProperty("api-key", BREVO_API_KEY);
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Accept", "application/json");
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
             conn.setDoOutput(true);
 
             // Escape backslashes, double quotes, and newlines for clean JSON formatting
@@ -77,7 +79,7 @@ public class EmailService {
 
     private void printFallbackOtp(String toEmail, String subject, String otp, String content) {
         System.out.println("==================================================");
-        System.out.println("                   ECOVERSEE MAIL MOCK             ");
+        System.out.println("                   GREENIZO MAIL MOCK             ");
         System.out.println("==================================================");
         System.out.println("TO: " + toEmail);
         System.out.println("SUBJECT: " + subject);

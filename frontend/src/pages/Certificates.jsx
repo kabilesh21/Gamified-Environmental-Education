@@ -66,7 +66,7 @@ export default function Certificates() {
       });
 
       pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
-      pdf.save(`ecoversee-certificate-${activeCert.certificateId}.pdf`);
+      pdf.save(`greenizo-certificate-${activeCert.certificateId}.pdf`);
     } catch (e) {
       console.error("PDF generation failed", e);
     } finally {
@@ -180,9 +180,9 @@ export default function Certificates() {
                     <div style={styles.leafWatermarkR} />
 
                     <div style={styles.certBody}>
-                      {/* Custom Ecoversee Logo Header */}
+                      {/* Custom Greenizo Logo Header */}
                       <div style={styles.logoRow}>
-                        <img src="/logo.png" alt="EcoVerse Logo" style={{ height: '55px', objectFit: 'contain' }} />
+                        <img src="/logo.png" alt="Greenizo Logo" style={{ height: '55px', objectFit: 'contain' }} />
                       </div>
                       
                       <span style={styles.certTag}>Certificate of Completion</span>
@@ -194,7 +194,7 @@ export default function Certificates() {
                       </p>
                       <h3 style={styles.completedCourseTitle}>{activeCert.courseName}</h3>
 
-                      {/* Verified Badge seal, Ecoverse seal, and Signature */}
+                      {/* Verified Badge seal, Greenizo seal, and Signature */}
                       <div style={styles.sealRow}>
                         {/* Course Badge */}
                         <div style={styles.sealBlock}>
@@ -207,7 +207,7 @@ export default function Certificates() {
                           </div>
                         </div>
 
-                        {/* Premium Ecoverse Gold Seal */}
+                        {/* Premium Greenizo Gold Seal */}
                         <div style={styles.premiumSeal}>
                           <svg width="64" height="64" viewBox="0 0 100 100" style={{ overflow: 'visible' }}>
                             <path d="M35 60 L20 95 L45 80 L50 60 Z" fill="#C59B27" />
@@ -215,7 +215,7 @@ export default function Certificates() {
                             <circle cx="50" cy="50" r="34" fill="#D4AC0D" stroke="#C59B27" strokeWidth="2" />
                             <circle cx="50" cy="50" r="28" fill="#1B4D2C" />
                             <circle cx="50" cy="50" r="23" fill="none" stroke="#D4AC0D" strokeWidth="1" strokeDasharray="3 3" />
-                            <text x="50" y="44" fill="#D4AC0D" fontSize="6.5" fontWeight="bold" textAnchor="middle" letterSpacing="0.5">ECOVERSE</text>
+                            <text x="50" y="44" fill="#D4AC0D" fontSize="6.5" fontWeight="bold" textAnchor="middle" letterSpacing="0.5">GREENIZO</text>
                             <text x="50" y="53" fill="#FFFFFF" fontSize="6" fontWeight="bold" textAnchor="middle" letterSpacing="0.5">OFFICIAL</text>
                             <text x="50" y="62" fill="#D4AC0D" fontSize="4.5" fontWeight="bold" textAnchor="middle">★ SEAL ★</text>
                           </svg>

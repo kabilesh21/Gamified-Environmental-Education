@@ -118,7 +118,7 @@ export default function DancingTree() {
           </g>
         </motion.g>
       </svg>
-      <span style={styles.caption}>Ecoversee Mascot</span>
+      <span style={styles.caption}>Greenizo Mascot</span>
     </div>
   );
 }

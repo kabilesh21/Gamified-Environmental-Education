@@ -37,7 +37,7 @@ export default function Navbar({ sidebarOpen }) {
           ...styles.pageTitle,
           marginLeft: !sidebarOpen ? '45px' : '0px',
           transition: 'all 0.3s ease'
-        }}>Ecoverse</h2>
+        }}>Greenizo</h2>
       </div>
 
       <div style={styles.right}>
