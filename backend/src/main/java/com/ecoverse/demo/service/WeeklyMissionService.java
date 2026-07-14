@@ -25,6 +25,9 @@ public class WeeklyMissionService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private DashboardService dashboardService;
+
     @Transactional
     public List<UserMissionProgress> getUserMissions(User user) {
         List<WeeklyMission> missions = weeklyMissionRepository.findAll();
@@ -81,6 +84,9 @@ public class WeeklyMissionService {
                     }
                     
                     userRepository.save(user);
+
+                    // Log activity
+                    dashboardService.logActivity(user, "Completed Weekly Mission: " + m.getTitle(), "+" + m.getRewardXp() + " XP", "MISSION");
                 }
                 userMissionProgressRepository.save(progress);
             }

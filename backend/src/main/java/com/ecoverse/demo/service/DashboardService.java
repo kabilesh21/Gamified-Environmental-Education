@@ -75,6 +75,7 @@ public class DashboardService {
     public List<UserActivityResponse> getRecentActivities(User user) {
         List<UserActivity> activities = userActivityRepository.findByUserIdOrderByTimestampDesc(user.getId());
         return activities.stream()
+                .filter(a -> "MISSION".equals(a.getType()) || "EVENT".equals(a.getType()))
                 .limit(5)
                 .map(a -> UserActivityResponse.builder()
                         .id(a.getId())

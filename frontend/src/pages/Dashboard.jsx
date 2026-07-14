@@ -161,6 +161,10 @@ export default function Dashboard() {
   const getActivityIcon = (type) => {
     const size = 16;
     switch (type?.toUpperCase()) {
+      case 'MISSION':
+        return { icon: <Trophy size={size} color="#ED8936" />, bg: '#FEF3C7' };
+      case 'EVENT':
+        return { icon: <Award size={size} color="#9F7AEA" />, bg: '#FAF5FF' };
       case 'QUIZ':
         return { icon: <Trophy size={size} color="#E53E3E" />, bg: '#FFF5F5' };
       case 'BADGE':

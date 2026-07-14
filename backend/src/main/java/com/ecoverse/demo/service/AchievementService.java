@@ -29,6 +29,9 @@ public class AchievementService {
     @Autowired
     private DashboardService dashboardService;
 
+    @Autowired
+    private SeasonalEventRepository seasonalEventRepository;
+
     @Transactional
     public boolean unlockAchievement(User user, String key) {
         // If user already has this achievement, do nothing
@@ -79,6 +82,23 @@ public class AchievementService {
         // Unlocking a badge also gives 50 XP
         awardXpAndCheckLevel(user, 50);
         dashboardService.logActivity(user, "Earned badge \"" + badge.getName() + "\"", "+50 XP", "BADGE");
+
+        // Check if this badge completes a seasonal event
+        Optional<SeasonalEvent> eventOpt = seasonalEventRepository.findByBadgeReward(badge.getName());
+        if (eventOpt.isPresent()) {
+            SeasonalEvent event = eventOpt.get();
+            user.setXp(user.getXp() + event.getRewardXp());
+            user.setCoins(user.getCoins() + event.getRewardCoins());
+            
+            // Simple level calculation: 1 level per 500 XP
+            int calculatedLevel = (user.getXp() / 500) + 1;
+            if (calculatedLevel > user.getLevel()) {
+                user.setLevel(calculatedLevel);
+            }
+            userRepository.save(user);
+
+            dashboardService.logActivity(user, "Completed Seasonal Event: " + event.getTitle(), "+" + event.getRewardXp() + " XP", "EVENT");
+        }
         return true;
     }
 

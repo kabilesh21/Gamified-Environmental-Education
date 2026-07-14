@@ -6,9 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SeasonalEventRepository extends JpaRepository<SeasonalEvent, Long> {
     @Query("SELECT e FROM SeasonalEvent e WHERE e.active = true AND :currentDate BETWEEN e.startDate AND e.endDate")
     List<SeasonalEvent> findActiveEvents(LocalDate currentDate);
+
+    Optional<SeasonalEvent> findByBadgeReward(String badgeReward);
 }
