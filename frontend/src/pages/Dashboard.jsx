@@ -2,113 +2,37 @@ import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { 
-  Flame, Leaf, Trophy, Globe, Play, FileText, ArrowRight, Award, HelpCircle, Menu, Coins, ShoppingBag, Gift, Calendar, CheckSquare, Hourglass, ChevronRight
-} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  GraduationCap, Leaf, BookOpen, Trophy, 
+  CheckCircle, ArrowRight, HelpCircle, Gift, Users, Award, Flame, Calendar
+} from 'lucide-react';
 
-// Simple medal illustration helper component
-function MedalSvg({ color, name, label }) {
-  return (
-    <div style={styles.badgeItem}>
-      <div style={styles.medalIcon}>
-        <svg width="50" height="50" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Ribbon */}
-          <path d="M22 12 L32 32 L42 12 Z" fill="#d32f2f" />
-          <path d="M27 12 L32 24 L37 12 Z" fill="#ffffff" />
-          {/* Medal Circle */}
-          <circle cx="32" cy="36" r="18" fill={color} stroke="#ffffff" strokeWidth="2" />
-          <circle cx="32" cy="36" r="14" fill="none" stroke="#ffffff" strokeWidth="1" strokeDasharray="3 3" />
-          {/* Leaf in Medal */}
-          <path d="M32 26 C35 30, 35 38, 32 42 C29 38, 29 30, 32 26 Z" fill="#ffffff" opacity="0.9" />
-          <path d="M29 36 H35" stroke="#ffffff" strokeWidth="1" />
-        </svg>
-      </div>
-      <span style={styles.badgeName}>{name}</span>
-      <span style={styles.badgeLabel}>{label}</span>
-    </div>
-  );
-}
-
-// Activity list item helper
-function ActivityItem({ icon, iconBg, title, points, pointsColor }) {
-  return (
-    <div style={styles.activityItem}>
-      <div style={{ ...styles.activityIconWrapper, backgroundColor: iconBg }}>
-        {icon}
-      </div>
-      <div style={styles.activityText}>
-        <span style={styles.activityTitle}>{title}</span>
-        <span style={{ ...styles.activityPoints, color: pointsColor }}>{points}</span>
-      </div>
-    </div>
-  );
-}
-
-// Quick action card helper
-function QuickActionCard({ icon, iconBg, title, desc, onClick }) {
-  return (
-    <motion.div 
-      style={styles.quickActionCard} 
-      onClick={onClick}
-      whileHover={{ y: -4, scale: 1.02, borderColor: '#2e7d32', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.06)' }}
-    >
-      <div style={{ ...styles.quickActionIconWrapper, backgroundColor: iconBg }}>
-        {icon}
-      </div>
-      <div style={styles.quickActionContent}>
-        <span style={styles.quickActionTitle}>{title}</span>
-        <span style={styles.quickActionDesc}>{desc}</span>
-      </div>
-      <div style={styles.quickActionArrow}>
-        <ArrowRight size={16} color="#2e7d32" />
-      </div>
-    </motion.div>
-  );
-}
-
-// Custom activity icons
-const RecyclingIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-  </svg>
-);
-
-const WaterIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ fill: '#e0f2fe' }}>
-    <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z" />
-  </svg>
-);
-
-const TreeIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ fill: '#e6f4ea' }}>
-    <path d="M12 22v-5M17 17H7l5-7 5 7zM15 10H9l3-5 3 5z" />
-  </svg>
-);
-
-export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
+export default function Dashboard() {
   const { user, refreshUserData } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [stats, setStats] = useState({
+    level: 4,
+    xp: 1250,
+    completedCoursesCount: 12,
+    unlockedBadgesCount: 3,
+  });
+
   const [treeInfo, setTreeInfo] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [activeEvents, setActiveEvents] = useState([]);
   const [missions, setMissions] = useState([]);
-  const [gardenPercent, setGardenPercent] = useState(0);
+  const [userBadges, setUserBadges] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [manualRotation, setManualRotation] = useState(0);
-  const [isRotatingAuto, setIsRotatingAuto] = useState(true);
+  // Trivia Game States
   const [currentTrivia, setCurrentTrivia] = useState(null);
   const [triviaFeedback, setTriviaFeedback] = useState("");
   const [triviaSuccess, setTriviaSuccess] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
-
-  // Force re-renders for live cooldown timer
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const [isRotatingAuto, setIsRotatingAuto] = useState(true);
+  const [manualRotation, setManualRotation] = useState(0);
 
   const triviaQuestions = [
     {
@@ -133,10 +57,75 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
     }
   ];
 
-  const getDailyQuestionIndex = () => {
-    const now = new Date();
-    const daySeed = now.getDate() + now.getMonth() * 31 + now.getFullYear() * 372;
-    return daySeed % triviaQuestions.length;
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        await refreshUserData().catch(err => console.warn("Profile stats refresh failed:", err));
+        
+        // Fetch dashboard stats
+        const statsRes = await axios.get('/api/dashboard/stats').catch(err => console.warn(err));
+        if (statsRes && statsRes.data) {
+          setStats({
+            level: statsRes.data.level || 4,
+            xp: statsRes.data.xp || 1250,
+            completedCoursesCount: statsRes.data.completedCoursesCount || 12,
+            unlockedBadgesCount: statsRes.data.unlockedBadgesCount || 3,
+          });
+        }
+
+        // Fetch virtual tree info
+        const treeRes = await axios.get('/api/tree').catch(err => console.warn(err));
+        if (treeRes && treeRes.data) {
+          setTreeInfo(treeRes.data);
+        }
+
+        // Fetch leaderboard
+        const lbRes = await axios.get('/api/leaderboard').catch(err => console.warn(err));
+        if (lbRes && lbRes.data) {
+          setLeaderboard(lbRes.data.slice(0, 5));
+        }
+
+        // Fetch active events
+        const eventsRes = await axios.get('/api/events/active').catch(err => console.warn(err));
+        if (eventsRes && eventsRes.data) {
+          setActiveEvents(eventsRes.data);
+        }
+
+        // Fetch missions
+        const missionsRes = await axios.get('/api/missions').catch(err => console.warn(err));
+        if (missionsRes && missionsRes.data) {
+          setMissions(missionsRes.data);
+        }
+
+        // Fetch user badges
+        const profileRes = await axios.get('/api/profile').catch(err => console.warn(err));
+        if (profileRes && profileRes.data) {
+          setUserBadges(profileRes.data.unlockedBadges || []);
+        }
+
+      } catch (err) {
+        console.error("Dashboard general loading error", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
+
+  const displayName = user?.fullName || 'Kabilesh M';
+  const displayXp = user?.xp || stats.xp;
+  const displayLevel = user?.level || stats.level;
+
+  const isEventCompleted = (event) => {
+    return userBadges.some(b => b.name.toLowerCase() === event.badgeReward.toLowerCase());
   };
 
   const getSunlightCooldownString = () => {
@@ -154,8 +143,8 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
   };
 
   const startTrivia = () => {
-    const qIdx = getDailyQuestionIndex();
-    const dailyQ = triviaQuestions[qIdx];
+    const daySeed = new Date().getDate() + new Date().getMonth() * 31;
+    const dailyQ = triviaQuestions[daySeed % triviaQuestions.length];
     setCurrentTrivia(dailyQ);
     setTriviaFeedback("");
     setTriviaSuccess(false);
@@ -180,523 +169,193 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
     }
   };
 
-  const [stats, setStats] = useState({
-    level: 12,
-    xp: 1200,
-    nextLevelXpThreshold: 2000,
-    currentStreak: 7,
-    completedQuests: 15,
-    treesSaved: 0,
-    waterSavedLiters: 0,
-    co2ReducedKg: 0,
-    completedCoursesCount: 0,
-    unlockedBadgesCount: 0
-  });
-
-  const [isTreeChallengeCompleted, setIsTreeChallengeCompleted] = useState(false);
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [_, statsRes, treeRes, eventsRes, missionsRes, gardenRes] = await Promise.all([
-          refreshUserData().catch(err => console.warn("Failed to refresh user profile:", err)),
-          axios.get('/api/dashboard/stats').catch(err => console.error("Failed to load stats:", err)),
-          axios.get('/api/tree').catch(err => console.error("Failed to load tree:", err)),
-          axios.get('/api/events/active').catch(err => console.error("Failed to load events:", err)),
-          axios.get('/api/missions').catch(err => console.error("Failed to load missions:", err)),
-          axios.get('/api/garden').catch(err => console.error("Failed to load garden:", err)),
-        ]);
-        
-        if (statsRes && statsRes.data) {
-          setStats(prev => ({
-            ...prev,
-            ...statsRes.data,
-            completedQuests: statsRes.data.completedQuests || statsRes.data.completedCoursesCount || 15
-          }));
-        }
-        if (treeRes && treeRes.data) {
-          setTreeInfo(treeRes.data);
-        }
-        if (eventsRes && eventsRes.data) {
-          setActiveEvents(eventsRes.data);
-        }
-        if (missionsRes && missionsRes.data) {
-          setMissions(missionsRes.data);
-        }
-        if (gardenRes && gardenRes.data) {
-          const unlocked = gardenRes.data.filter(i => i.unlocked).length;
-          const total = gardenRes.data.length || 1;
-          setGardenPercent(Math.round((unlocked * 100) / total));
-        }
-      } catch (err) {
-        console.error("Dashboard general loading error", err);
-      }
-    };
-    fetchDashboardData();
-
-    // Check tree plantation challenge completion state from localStorage
-    const saved = localStorage.getItem('ecoverse_active_challenges');
-    if (saved) {
-      try {
-        const challenges = JSON.parse(saved);
-        const treeChallenge = challenges.find(c => c.id === 3);
-        if (treeChallenge && treeChallenge.progress >= treeChallenge.target) {
-          setIsTreeChallengeCompleted(true);
-        }
-      } catch (e) {
-        console.error("Error reading challenge state in dashboard", e);
-      }
+  const handleWaterTree = async () => {
+    if ((user?.coins ?? 0) < 5) {
+      alert("Need at least 5 Eco Coins to water the tree!");
+      return;
     }
-  }, []);
-
-  const xp = user?.xp || stats.xp;
-  const level = user?.level || stats.level;
-  const streak = user?.streak || stats.currentStreak;
-  const fullName = user?.fullName || 'Arjun';
-
-  const xpProgressPercent = Math.min((xp * 100) / (stats.nextLevelXpThreshold || 2000), 100);
-
-  const getLevelDescription = (lvl) => {
-    if (lvl < 5) return "Eco Beginner";
-    if (lvl < 10) return "Eco Helper";
-    if (lvl < 15) return "Green Learner";
-    return "Eco Warrior";
+    try {
+      const res = await axios.post('/api/tree/water');
+      setTreeInfo(res.data);
+      await refreshUserData();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to water the tree.");
+    }
   };
 
+  const handleFertilizeTree = async () => {
+    if ((user?.coins ?? 0) < 10) {
+      alert("Need at least 10 Eco Coins to fertilize the tree!");
+      return;
+    }
+    try {
+      const res = await axios.post('/api/tree/fertilize');
+      setTreeInfo(res.data);
+      await refreshUserData();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to fertilize the tree.");
+    }
+  };
+
+  const getLeaderboardList = () => {
+    if (leaderboard.length > 0) {
+      return leaderboard;
+    }
+    return [
+      { id: 101, fullName: "Priya S", xp: 2450, level: 8, profilePicture: "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Priya" },
+      { id: user?.id || 102, fullName: displayName, xp: displayXp, level: displayLevel, profilePicture: user?.profilePicture || "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Kabilesh" },
+      { id: 103, fullName: "Arjun R", xp: 980, level: 3, profilePicture: "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Arjun" },
+      { id: 104, fullName: "Sneha P", xp: 870, level: 3, profilePicture: "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Sneha" },
+      { id: 105, fullName: "Rahul K", xp: 760, level: 2, profilePicture: "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rahul" }
+    ].sort((a, b) => b.xp - a.xp);
+  };
+
+  const currentLeaderboard = getLeaderboardList();
+
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (60 / 100) * circumference;
+
   return (
-    <div style={styles.dashboardPage}>
+    <div style={styles.dashboardContainer}>
       
+      {/* 1. Welcome Banner Card (Lavender converted to Light Green with stats widgets in center empty space) */}
+      <div style={styles.heroBanner}>
+        <div style={styles.heroLeft}>
+          <span style={styles.welcomeLabel}>Welcome back,</span>
+          <h1 style={styles.heroTitle}>{displayName.toUpperCase()}! 👋</h1>
+          <p style={styles.heroDesc}>
+            Keep learning, keep earning and help save our planet.
+          </p>
+        </div>
 
-
-      {/* Title Header */}
-      <div style={styles.headerContainer}>
-        <Leaf size={28} color="#2e7d32" fill="#2e7d32" style={{ transform: 'rotate(-45deg)' }} />
-        <h1 style={styles.mainTitle}>Gamified Environmental Education</h1>
-        <Leaf size={28} color="#2e7d32" fill="#2e7d32" style={{ transform: 'rotate(45deg)' }} />
-      </div>
-
-      {/* Row 1: Top Cards */}
-      <div style={styles.topCardsGrid}>
-        {/* Level Card */}
-        <motion.div 
-          style={styles.statCard}
-          whileHover={{ scale: 1.02, borderColor: '#2e7d32' }}
-        >
-          <div style={styles.statIconWrapper}>
-            <Leaf size={22} color="#2e7d32" fill="#2e7d32" />
+        {/* Center column stats widget to fill space beautifully */}
+        <div style={styles.heroCenter}>
+          <div style={styles.miniStatBadge}>
+            <span style={styles.miniStatLabel}>Daily Streak</span>
+            <span style={styles.miniStatVal}>🔥 {user?.streak || 7} Days</span>
           </div>
-          <div style={styles.statContent}>
-            <span style={styles.statLabel}>Level</span>
-            <span style={styles.statValue}>{level}</span>
-            <span style={styles.statSubtext}>{getLevelDescription(level)}</span>
+          <div style={styles.miniStatBadge}>
+            <span style={styles.miniStatLabel}>Eco Coins</span>
+            <span style={styles.miniStatVal}>🪙 {user?.coins || 120}</span>
           </div>
-        </motion.div>
-
-        {/* Points Card */}
-        <motion.div 
-          style={styles.statCard}
-          whileHover={{ scale: 1.02, borderColor: '#2e7d32' }}
-        >
-          <div style={{ ...styles.statIconWrapper, backgroundColor: '#fef3c7' }}>
-            <Trophy size={22} color="#d97706" fill="#d97706" />
-          </div>
-          <div style={styles.statContent}>
-            <span style={styles.statLabel}>Points</span>
-            <span style={styles.statValue}>{xp.toLocaleString()}</span>
-            <span style={styles.statSubtext}>Keep it up!</span>
-          </div>
-        </motion.div>
-
-        {/* Streak Card */}
-        <motion.div 
-          style={styles.statCard}
-          whileHover={{ scale: 1.02, borderColor: '#2e7d32' }}
-        >
-          <div style={{ ...styles.statIconWrapper, backgroundColor: '#fee2e2' }}>
-            <Flame size={22} color="#dc2626" fill="#dc2626" />
-          </div>
-          <div style={styles.statContent}>
-            <span style={styles.statLabel}>Streak</span>
-            <span style={styles.statValue}>{streak}</span>
-            <span style={styles.statSubtext}>days</span>
-          </div>
-        </motion.div>
-
-        {/* Quests Card */}
-        <motion.div 
-          style={styles.statCard}
-          whileHover={{ scale: 1.02, borderColor: '#2e7d32' }}
-        >
-          <div style={{ ...styles.statIconWrapper, backgroundColor: '#dbeafe' }}>
-            <Globe size={22} color="#2563eb" fill="#2563eb" />
-          </div>
-          <div style={styles.statContent}>
-            <span style={styles.statLabel}>Quests</span>
-            <span style={styles.statValue}>{stats.completedQuests}</span>
-            <span style={styles.statSubtext}>Completed</span>
-          </div>
-        </motion.div>
-
-        {/* User Card (Centered Username Profile) */}
-        <motion.div 
-          style={styles.statCard}
-          whileHover={{ scale: 1.02, borderColor: '#2e7d32' }}
-        >
-          <div style={{ ...styles.statIconWrapper, backgroundColor: 'transparent', padding: 0 }}>
-            <img src="/arjun_avatar.png" alt="User Avatar" style={{ width: '44px', height: '44px', borderRadius: '50%', border: '2px solid #2e7d32', objectFit: 'cover' }} />
-          </div>
-          <div style={styles.statContent}>
-            <span style={styles.statLabel}>User Profile</span>
-            <span style={{ ...styles.statValue, fontSize: fullName.length > 10 ? '1.1rem' : '1.3rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fullName}</span>
-            <span style={styles.statSubtext}>{getLevelDescription(level)} ({xp} XP)</span>
-          </div>
-        </motion.div>
-
-        {/* Coins Card */}
-        <motion.div 
-          style={styles.statCard}
-          whileHover={{ scale: 1.02, borderColor: '#2e7d32' }}
-        >
-          <div style={{ ...styles.statIconWrapper, backgroundColor: '#fef9c3' }}>
-            <Coins size={22} color="#ca8a04" fill="#ca8a04" />
-          </div>
-          <div style={styles.statContent}>
-            <span style={styles.statLabel}>Eco Coins</span>
-            <span style={styles.statValue}>{user?.coins ?? 0}</span>
-            <span style={styles.statSubtext}>Spend in Shop!</span>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Row 2: Earth Progress & Daily Challenge */}
-      <div style={styles.middleRowGrid}>
-        {/* Save the Earth Progress */}
-        <div style={styles.saveEarthCard}>
-          <div style={styles.saveEarthLeft}>
-            <h2 style={styles.cardTitle}>Save the Earth Progress</h2>
-            <div style={styles.saveEarthProgressInfo}>
-              <span style={styles.saveEarthLevel}>Level {level}</span>
-            </div>
-            <div style={styles.saveEarthProgressWrapper}>
-              <div style={styles.saveEarthProgressBarOuter}>
-                <div style={{ ...styles.saveEarthProgressBarInner, width: '75%' }}></div>
-              </div>
-              <span style={styles.saveEarthPercent}>75%</span>
-            </div>
-          </div>
-          <div style={styles.saveEarthRight}>
-            <img src="/save_earth_globe.png" alt="Earth Globe" style={styles.globeImage} />
+          <div style={styles.miniStatBadge}>
+            <span style={styles.miniStatLabel}>Current XP</span>
+            <span style={styles.miniStatVal}>⭐ {displayXp.toLocaleString()}</span>
           </div>
         </div>
 
-        {/* Daily Challenge (Start Now redirects to /challenges, syncs state) */}
-        <div style={styles.dailyChallengeCard}>
-          <h2 style={styles.cardTitle}>Daily Challenge</h2>
-          <div style={styles.challengeInfo}>
-            <div style={styles.challengeIconWrapper}>
-              <Leaf size={24} color="#ffffff" fill="#ffffff" />
-            </div>
-            <div style={styles.challengeText}>
-              <span style={styles.challengeName}>Plant a Tree</span>
-              <span style={styles.challengeDesc}>Plant a tree in your nearby area</span>
-              <div style={styles.challengeReward}>
-                <span style={styles.rewardLabel}>Reward:</span>
-                <span style={styles.rewardItem}>⭐ 100</span>
-                <span style={styles.rewardItem}>🪙 50</span>
-              </div>
-            </div>
-          </div>
-          <button 
-            style={{
-              ...styles.startBtn,
-              backgroundColor: isTreeChallengeCompleted ? '#a0aec0' : '#2e7d32',
-              cursor: isTreeChallengeCompleted ? 'not-allowed' : 'pointer'
-            }} 
-            onClick={() => {
-              if (!isTreeChallengeCompleted) {
-                navigate('/challenges');
-              }
-            }}
-            disabled={isTreeChallengeCompleted}
-          >
-            {isTreeChallengeCompleted ? 'Completed! 🎉' : 'Start Now'}
-          </button>
+        <div style={styles.heroRight}>
+          <img 
+            src="/dashboard_welcome_earth.png" 
+            alt="Greenizo Welcome Earth" 
+            style={styles.heroImage}
+          />
         </div>
       </div>
 
-      {/* Eco Reserve Section: Virtual Tree & Garden Preview & Shop Shortcut */}
-      <div style={styles.reserveSectionGrid}>
-        {/* Virtual Tree Growth Card */}
-        <div style={{ ...styles.reserveCard, minHeight: '340px' }}>
-          <h2 style={styles.cardTitle}>🌳 Virtual Tree Growth</h2>
-          <div style={styles.treeDisplayArea}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <motion.div 
-                style={{
-                  ...styles.treeEmojiWrapper,
-                  perspective: '1000px',
-                  transformStyle: 'preserve-3d',
-                }}
-                animate={isRotatingAuto ? { 
-                  rotateY: [manualRotation, manualRotation + 360], 
-                  y: [0, -6, 0] 
-                } : { 
-                  rotateY: manualRotation, 
-                  y: [0, -6, 0] 
-                }}
-                transition={{ 
-                  rotateY: { repeat: isRotatingAuto ? Infinity : 0, duration: 15, ease: "linear" },
-                  y: { repeat: Infinity, duration: 3, ease: "easeInOut" }
-                }}
-              >
-                <span style={{ fontSize: '3.8rem', display: 'inline-block', transform: 'translateZ(20px)' }}>
-                  {treeInfo?.imageUrl || '🌱'}
-                </span>
-              </motion.div>
-              
-              {/* Rotation Controls */}
-              <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                <button 
-                  onClick={() => {
-                    setIsRotatingAuto(false);
-                    setManualRotation(prev => prev - 30);
-                  }} 
-                  style={styles.rotateBtn}
-                  title="Rotate Left"
-                >
-                  ↺
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsRotatingAuto(true);
-                  }} 
-                  style={{
-                    ...styles.rotateBtn,
-                    backgroundColor: isRotatingAuto ? '#e6f4ea' : '#FAF8F5',
-                    color: isRotatingAuto ? '#2e7d32' : '#2D241E',
-                    fontSize: '0.7rem',
-                    padding: '4px 8px'
-                  }}
-                  title="Auto Spin"
-                >
-                  Auto
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsRotatingAuto(false);
-                    setManualRotation(prev => prev + 30);
-                  }} 
-                  style={styles.rotateBtn}
-                  title="Rotate Right"
-                >
-                  ↻
-                </button>
-              </div>
-            </div>
-
-            <div style={styles.treeDetails}>
-              <span style={styles.treeStageTitle}>Stage: {treeInfo?.stageName || 'Seed'}</span>
-              <span style={styles.treeStageSub}>Level {treeInfo?.level || 1} Growth</span>
-              <div style={styles.treeProgressOuter}>
-                <div style={{ ...styles.treeProgressInner, width: `${treeInfo?.progressPercent || 0}%` }} />
-              </div>
-              <span style={styles.treeXpLabel}>
-                {treeInfo?.currentXp || xp} / {treeInfo?.nextStageXp || 200} XP to Next Stage
-              </span>
-            </div>
+      {/* 2. Metrics Cards Row */}
+      <div style={styles.metricsGrid}>
+        
+        {/* Metric 1: Level */}
+        <div style={styles.metricCard}>
+          <div style={{ ...styles.iconContainer, backgroundColor: '#FAF5FF' }}>
+            <GraduationCap size={22} color="#9F7AEA" />
           </div>
-
-          <div style={styles.gameDivider} />
-
-          {/* Interactive nurture and trivia games panel */}
-          {currentTrivia ? (
-            <div style={styles.triviaContainer}>
-              <span style={styles.triviaTitle}>☀️ Sunlight Trivia</span>
-              <p style={styles.triviaQ}>{currentTrivia.q}</p>
-              <div style={styles.triviaOptionsList}>
-                {currentTrivia.options.map((opt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleTriviaAnswer(idx)}
-                    style={{
-                      ...styles.triviaOptBtn,
-                      borderColor: triviaFeedback && idx === currentTrivia.correctIdx ? '#7FB77E' : '#EADBCE',
-                      backgroundColor: triviaFeedback && idx === currentTrivia.correctIdx ? '#e6f4ea' : '#FFFFFF'
-                    }}
-                    disabled={triviaSuccess}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-              {triviaFeedback && (
-                <p style={{ 
-                  ...styles.triviaFeedback, 
-                  color: triviaSuccess ? '#2e7d32' : '#dc2626' 
-                }}>
-                  {triviaFeedback}
-                </p>
-              )}
-              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                {!triviaSuccess && (
-                  <button onClick={startTrivia} style={styles.triviaActionBtn}>
-                    New Question
-                  </button>
-                )}
-                <button onClick={() => setCurrentTrivia(null)} style={{ ...styles.triviaActionBtn, backgroundColor: '#6E5C50' }}>
-                  Close Game
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div style={styles.gameActionsArea}>
-              <span style={styles.gameSectionLabel}>Nurture & Play Actions:</span>
-              <div style={styles.gameButtonsRow}>
-                <button 
-                  onClick={async () => {
-                    if ((user?.coins ?? 0) < 5) {
-                      alert("Need at least 5 Eco Coins to water the tree!");
-                      return;
-                    }
-                    try {
-                      const res = await axios.post('/api/tree/water');
-                      setTreeInfo(res.data);
-                      await refreshUserData();
-                    } catch (err) {
-                      alert(err.response?.data?.message || "Failed to water the tree.");
-                    }
-                  }}
-                  style={styles.gameBtn}
-                >
-                  💧 Water (-5 🪙)
-                </button>
-
-                <button 
-                  onClick={async () => {
-                    if ((user?.coins ?? 0) < 10) {
-                      alert("Need at least 10 Eco Coins to fertilize the tree!");
-                      return;
-                    }
-                    try {
-                      const res = await axios.post('/api/tree/fertilize');
-                      setTreeInfo(res.data);
-                      await refreshUserData();
-                    } catch (err) {
-                      alert(err.response?.data?.message || "Failed to fertilize the tree.");
-                    }
-                  }}
-                  style={styles.gameBtn}
-                >
-                  🌿 Fertilize (-10 🪙)
-                </button>
-
-                 {getSunlightCooldownString() ? (
-                  <button 
-                    style={{ 
-                      ...styles.gameBtn, 
-                      backgroundColor: '#cbd5e0', 
-                      color: '#4a5568', 
-                      borderColor: '#a0aec0',
-                      cursor: 'not-allowed'
-                    }}
-                    disabled
-                  >
-                    ☀️ Sunlight: {getSunlightCooldownString()}
-                  </button>
-                ) : (
-                  <button 
-                    onClick={startTrivia}
-                    style={{ ...styles.gameBtn, backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fcd34d' }}
-                  >
-                    ☀️ Sunlight Trivia (+50 XP)
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Eco Garden Preview Card */}
-        <div style={styles.reserveCard}>
-          <h2 style={styles.cardTitle}>🪴 Eco Garden</h2>
-          <div style={styles.gardenPreviewArea}>
-            <div style={styles.miniGardenLandscape}>
-              {/* Decorative mini pond & path */}
-              <div style={styles.miniPond} />
-              <span style={{ position: 'absolute', top: '10px', left: '15px', fontSize: '1rem' }}>🌻</span>
-              <span style={{ position: 'absolute', top: '15px', right: '25px', fontSize: '1rem' }}>🦋</span>
-              <span style={{ position: 'absolute', bottom: '10px', right: '35px', fontSize: '1.2rem' }}>🌳</span>
-              <span style={{ position: 'absolute', bottom: '15px', left: '20px', fontSize: '1rem' }}>🪑</span>
-            </div>
-            <div style={styles.gardenPreviewDetails}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={styles.gardenCompletionLabel}>Completion Rate</span>
-                <span style={styles.gardenCompletionVal}>{gardenPercent}%</span>
-              </div>
-              <button onClick={() => navigate('/garden')} style={styles.reserveCardBtn}>
-                <span>Visit Garden Reserve</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
+          <div style={styles.metricDetails}>
+            <span style={styles.metricLabel}>Current Level</span>
+            <span style={styles.metricValue}>Level {displayLevel}</span>
+            <span style={styles.metricSubtext}>Eco Learner</span>
           </div>
         </div>
 
-        {/* Eco Reward Shop Shortcut Card */}
-        <div style={styles.reserveCard}>
-          <h2 style={styles.cardTitle}>🎁 Reward Shop</h2>
-          <div style={styles.shopShortcutArea}>
-            <div style={styles.shopIconCircle}>
-              <ShoppingBag size={24} color="#1b4d2c" />
-            </div>
-            <p style={styles.shopShortcutDesc}>
-              Spend Eco Coins to unlock trees, flowers, and animals for your garden!
-            </p>
-            <button onClick={() => navigate('/shop')} style={styles.shopBtnPrimary}>
-              <span>Open Reward Shop</span>
-              <ArrowRight size={14} />
-            </button>
+        {/* Metric 2: Total Points */}
+        <div style={styles.metricCard}>
+          <div style={{ ...styles.iconContainer, backgroundColor: '#E6F4EA' }}>
+            <Leaf size={22} color="#2E7D32" />
+          </div>
+          <div style={styles.metricDetails}>
+            <span style={styles.metricLabel}>Total Points</span>
+            <span style={styles.metricValue}>{displayXp.toLocaleString()}</span>
+            <span style={styles.metricSubtext}>Keep Going! 🌱</span>
           </div>
         </div>
+
+        {/* Metric 3: Modules Completed */}
+        <div style={styles.metricCard}>
+          <div style={{ ...styles.iconContainer, backgroundColor: '#EBF8FF' }}>
+            <BookOpen size={22} color="#3182CE" />
+          </div>
+          <div style={{ ...styles.metricDetails, width: '100%' }}>
+            <span style={styles.metricLabel}>Modules Completed</span>
+            <span style={styles.metricValue}>{stats.completedCoursesCount} / 20</span>
+            <div style={styles.progressTrack}>
+              <div style={{ ...styles.progressBar, width: `${(stats.completedCoursesCount / 20) * 100}%`, backgroundColor: '#3182CE' }} />
+            </div>
+            <span style={styles.metricSubtext}>{Math.round((stats.completedCoursesCount / 20) * 100)}% Completed</span>
+          </div>
+        </div>
+
+        {/* Metric 4: Quizzes Completed */}
+        <div style={styles.metricCard}>
+          <div style={{ ...styles.iconContainer, backgroundColor: '#FFF5F5' }}>
+            <Trophy size={22} color="#E53E3E" />
+          </div>
+          <div style={styles.metricDetails}>
+            <span style={styles.metricLabel}>Quizzes Completed</span>
+            <span style={styles.metricValue}>{stats.completedCoursesCount - 4 > 0 ? stats.completedCoursesCount - 4 : 8} / 15</span>
+            <span style={styles.metricSubtext}>Great Job! 🎉</span>
+          </div>
+        </div>
+
       </div>
 
-      {/* Seasonal Events & Weekly Missions Section */}
-      <div style={styles.eventsMissionsGrid}>
-        {/* Active Seasonal Events Column */}
-        <div style={styles.eventsColumn}>
-          <h2 style={styles.cardTitle}>🏅 Active Seasonal Events</h2>
+      {/* 2.5. Seasonal Events & Weekly Missions Row */}
+      <div style={styles.eventsMissionsRow}>
+        
+        {/* Left: Seasonal Events */}
+        <div style={{ ...styles.gridCard, flex: 1.3 }}>
+          <h3 style={styles.cardHeader}>🏅 Active Seasonal Events</h3>
           {activeEvents.length > 0 ? (
             <div style={styles.eventsList}>
-              {activeEvents.map(event => (
-                <div key={event.id} style={styles.eventCard}>
-                  <img src={event.bannerUrl} alt={event.title} style={styles.eventBanner} />
-                  <div style={styles.eventInfo}>
-                    <div style={styles.eventHeaderRow}>
-                      <h3 style={styles.eventTitle}>{event.title}</h3>
-                      <span style={styles.eventBadgeReward}>🎖️ {event.badgeReward}</span>
-                    </div>
-                    <p style={styles.eventDesc}>{event.description}</p>
-                    <div style={styles.eventMetaRow}>
-                      <div style={styles.eventRewards}>
-                        <span style={styles.eventRewardItem}>⭐ +{event.rewardXp} XP</span>
-                        <span style={styles.eventRewardItem}>🪙 +{event.rewardCoins} Coins</span>
+              {activeEvents.map(event => {
+                const completed = isEventCompleted(event);
+                return (
+                  <div key={event.id} style={styles.eventCard}>
+                    <img src={event.bannerUrl} alt={event.title} style={styles.eventBanner} />
+                    <div style={styles.eventInfo}>
+                      <div style={styles.eventHeaderRow}>
+                        <h4 style={styles.eventTitle}>{event.title}</h4>
+                        {completed ? (
+                          <span style={{ ...styles.eventBadgeReward, backgroundColor: '#E6F4EA', color: '#2E7D32' }}>Completed! 🎉</span>
+                        ) : (
+                          <span style={styles.eventBadgeReward}>🎖️ {event.badgeReward}</span>
+                        )}
                       </div>
-                      <span style={styles.eventDate}>Ends: {event.endDate}</span>
+                      <p style={styles.eventDesc}>{event.description}</p>
+                      <div style={styles.eventMetaRow}>
+                        <div style={styles.eventRewards}>
+                          <span style={styles.eventRewardItem}>⭐ +{event.rewardXp} XP</span>
+                          <span style={styles.eventRewardItem}>🪙 +{event.rewardCoins} Coins</span>
+                        </div>
+                        <span style={styles.eventDate}>Ends: {event.endDate}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div style={styles.emptyState}>
-              <Calendar size={36} color="#A39387" />
-              <p>No active seasonal events at the moment. Check back soon!</p>
+              <Calendar size={36} color="#111827" />
+              <p style={{ marginTop: '10px', fontSize: '0.85rem', color: '#111827', fontWeight: '700' }}>No active seasonal events at the moment.</p>
             </div>
           )}
         </div>
 
-        {/* Weekly Missions Column */}
-        <div style={styles.missionsColumn}>
-          <h2 style={styles.cardTitle}>🎯 Weekly Missions</h2>
+        {/* Right: Weekly Missions */}
+        <div style={{ ...styles.gridCard, flex: 1 }}>
+          <h3 style={styles.cardHeader}>🎯 Weekly Missions</h3>
           <div style={styles.missionsList}>
             {missions.map(m => {
               const pct = Math.round((m.progress * 100) / m.target);
@@ -705,15 +364,15 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
                   <div style={styles.missionHeader}>
                     <span style={{
                       ...styles.missionCheckbox,
-                      backgroundColor: m.completed ? '#7FB77E' : 'transparent',
-                      borderColor: m.completed ? '#7FB77E' : '#A39387'
+                      backgroundColor: m.completed ? '#48BB78' : 'transparent',
+                      borderColor: m.completed ? '#48BB78' : '#111827'
                     }}>
                       {m.completed && '✓'}
                     </span>
                     <span style={{
                       ...styles.missionTitle,
                       textDecoration: m.completed ? 'line-through' : 'none',
-                      color: m.completed ? '#A39387' : '#2D241E'
+                      color: m.completed ? '#718096' : '#111827'
                     }}>
                       {m.title}
                     </span>
@@ -733,856 +392,663 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
             })}
           </div>
         </div>
+
       </div>
 
-      {/* Row 3: Continue Learning, Top Badges, Recent Activities */}
-      <div style={styles.bottomRowGrid}>
-        {/* Continue Learning */}
-        <div style={styles.learningCard}>
-          <h2 style={styles.cardTitle}>Continue Learning</h2>
-          <div style={styles.learningContent}>
-            <img src="/recycling_bins.png" alt="Recycling Bins" style={styles.recyclingImage} />
-            <span style={styles.learningName}>Waste Management</span>
-            <span style={styles.learningDesc}>Learn how to manage waste</span>
-            <div style={styles.learningProgressWrapper}>
-              <div style={styles.learningProgressBarOuter}>
-                <div style={{ ...styles.learningProgressBarInner, width: '60%' }}></div>
+      {/* 3. Middle Cards Row */}
+      <div style={styles.middleRow}>
+        
+        {/* Card A: Learning Progress */}
+        <div style={styles.gridCard}>
+          <h3 style={styles.cardHeader}>Learning Progress</h3>
+          <div style={styles.progressContent}>
+            {/* Circular Gauge */}
+            <div style={styles.circularWrapper}>
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle cx="55" cy="55" r={radius} stroke="#EBF8FF" strokeWidth="10" fill="transparent" />
+                <circle 
+                  cx="55" 
+                  cy="55" 
+                  r={radius} 
+                  stroke="#48BB78" 
+                  strokeWidth="10" 
+                  fill="transparent"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  transform="rotate(-90 55 55)"
+                />
+                <text x="50%" y="45%" textAnchor="middle" dominantBaseline="middle" style={styles.gaugeText}>
+                  60%
+                </text>
+                <text x="50%" y="65%" textAnchor="middle" dominantBaseline="middle" style={styles.gaugeLabel}>
+                  Overall
+                </text>
+                <text x="50%" y="76%" textAnchor="middle" dominantBaseline="middle" style={styles.gaugeLabel}>
+                  Progress
+                </text>
+              </svg>
+            </div>
+
+            {/* List of Topic Metrics */}
+            <div style={styles.topicsList}>
+              <div style={styles.topicItem}>
+                <div style={styles.topicHeader}>
+                  <span style={styles.topicName}>Air Pollution</span>
+                  <span style={styles.topicPercent}>100%</span>
+                </div>
+                <div style={styles.topicTrack}>
+                  <div style={{ ...styles.topicBar, width: '100%', backgroundColor: '#48BB78' }} />
+                </div>
               </div>
-              <span style={styles.learningPercent}>60%</span>
+
+              <div style={styles.topicItem}>
+                <div style={styles.topicHeader}>
+                  <span style={styles.topicName}>Water Conservation</span>
+                  <span style={styles.topicPercent}>75%</span>
+                </div>
+                <div style={styles.topicTrack}>
+                  <div style={{ ...styles.topicBar, width: '75%', backgroundColor: '#4299E1' }} />
+                </div>
+              </div>
+
+              <div style={styles.topicItem}>
+                <div style={styles.topicHeader}>
+                  <span style={styles.topicName}>Waste Management</span>
+                  <span style={styles.topicPercent}>50%</span>
+                </div>
+                <div style={styles.topicTrack}>
+                  <div style={{ ...styles.topicBar, width: '50%', backgroundColor: '#ED8936' }} />
+                </div>
+              </div>
+
+              <div style={styles.topicItem}>
+                <div style={styles.topicHeader}>
+                  <span style={styles.topicName}>Biodiversity</span>
+                  <span style={styles.topicPercent}>25%</span>
+                </div>
+                <div style={styles.topicTrack}>
+                  <div style={{ ...styles.topicBar, width: '25%', backgroundColor: '#9F7AEA' }} />
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Top Badges */}
-        <div style={styles.badgesCard}>
-          <h2 style={styles.cardTitle}>Top Badges</h2>
-          <div style={styles.badgesWrapper}>
-            <MedalSvg color="#b07d62" name="Bronze" label="Eco Beginner" />
-            <MedalSvg color="#b8c0c8" name="Silver" label="Eco Helper" />
-            <MedalSvg color="#fcc82c" name="Gold" label="Eco Champion" />
+        {/* Card B: Badges & Achievements */}
+        <div style={styles.gridCard}>
+          <div style={styles.headerWithAction}>
+            <h3 style={styles.cardHeader}>Badges & Achievements</h3>
+            <button onClick={() => navigate('/profile')} style={styles.viewAllBtn}>View All</button>
+          </div>
+          <div style={styles.badgesContainer}>
+            <div style={styles.badgeCard}>
+              <svg width="60" height="70" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 10 L30 2 L55 10 L55 40 C55 55 30 68 30 68 C30 68 5 55 5 40 Z" fill="#E8F5E9" stroke="#4CAF50" strokeWidth="3" />
+                <circle cx="30" cy="32" r="16" fill="#4CAF50" />
+                <path d="M25 38 L30 25 L35 38 Z" fill="#FFFFFF" />
+              </svg>
+              <span style={styles.badgeTitle}>Eco Starter</span>
+              <span style={styles.badgeStatus}>Earned</span>
+            </div>
+
+            <div style={styles.badgeCard}>
+              <svg width="60" height="70" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 10 L30 2 L55 10 L55 40 C55 55 30 68 30 68 C30 68 5 55 5 40 Z" fill="#E0F2FE" stroke="#0284C7" strokeWidth="3" />
+                <circle cx="30" cy="32" r="16" fill="#0284C7" />
+                <path d="M30 22 C34 26, 35 32, 30 38 C25 32, 26 26, 30 22 Z" fill="#FFFFFF" />
+              </svg>
+              <span style={styles.badgeTitle}>Water Saver</span>
+              <span style={styles.badgeStatus}>Earned</span>
+            </div>
+
+            <div style={styles.badgeCard}>
+              <svg width="60" height="70" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 10 L30 2 L55 10 L55 40 C55 55 30 68 30 68 C30 68 5 55 5 40 Z" fill="#FFF7ED" stroke="#F97316" strokeWidth="3" />
+                <circle cx="30" cy="32" r="16" fill="#F97316" />
+                <polygon points="30,22 33,28 40,29 35,34 36,41 30,37 24,41 25,34 20,29 27,28" fill="#FFFFFF" />
+              </svg>
+              <span style={styles.badgeTitle}>Quiz Master</span>
+              <span style={styles.badgeStatus}>Earned</span>
+            </div>
           </div>
         </div>
 
-        {/* Recent Activities */}
-        <div style={styles.activitiesCard}>
-          <div style={styles.activitiesHeader}>
-            <h2 style={styles.cardTitle}>Recent Activities</h2>
-            <button style={styles.viewAllLink} onClick={() => navigate('/certificates')}>View All</button>
+        {/* Card C: Leaderboard */}
+        <div style={styles.gridCard}>
+          <div style={styles.headerWithAction}>
+            <h3 style={styles.cardHeader}>Leaderboard (Top 5)</h3>
+            <button onClick={() => navigate('/leaderboard')} style={styles.viewAllBtn}>View All</button>
+          </div>
+          <div style={styles.leaderboardList}>
+            {currentLeaderboard.map((lbUser, idx) => {
+              const isCurrentUser = lbUser.fullName.toLowerCase() === displayName.toLowerCase();
+              const rank = idx + 1;
+              return (
+                <div 
+                  key={lbUser.id} 
+                  style={{
+                    ...styles.leaderboardRow,
+                    backgroundColor: isCurrentUser ? '#F4FBF5' : 'transparent',
+                    border: isCurrentUser ? '1px solid #C8E6C9' : '1px solid transparent'
+                  }}
+                >
+                  <div style={styles.leaderboardRank}>
+                    {rank === 1 && <span style={{ ...styles.medal, backgroundColor: '#FEF3C7', color: '#D97706' }}>1</span>}
+                    {rank === 2 && <span style={{ ...styles.medal, backgroundColor: '#E2E8F0', color: '#475569' }}>2</span>}
+                    {rank === 3 && <span style={{ ...styles.medal, backgroundColor: '#FFEDD5', color: '#C2410C' }}>3</span>}
+                    {rank > 3 && <span style={styles.rankNum}>{rank}</span>}
+                  </div>
+                  <img 
+                    src={lbUser.profilePicture || `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${lbUser.fullName}`} 
+                    alt={lbUser.fullName} 
+                    style={styles.lbAvatar}
+                  />
+                  <div style={styles.lbInfo}>
+                    <span style={{ 
+                      ...styles.lbName, 
+                      fontWeight: '800',
+                      color: isCurrentUser ? '#0F5132' : '#111827'
+                    }}>
+                      {lbUser.fullName} {isCurrentUser && <span style={styles.youTag}>(You)</span>}
+                    </span>
+                  </div>
+                  <span style={{ 
+                    ...styles.lbPoints,
+                    fontWeight: '800',
+                    color: isCurrentUser ? '#0F5132' : '#111827'
+                  }}>
+                    {lbUser.xp} pts
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+      </div>
+
+      {/* 4. Bottom Cards Row: Recent Activities, Virtual Tree, Quick Access */}
+      <div style={styles.bottomRow}>
+        
+        {/* Card D: Recent Activities */}
+        <div style={{ ...styles.gridCard, flex: 1.2 }}>
+          <div style={styles.headerWithAction}>
+            <h3 style={styles.cardHeader}>Recent Activities</h3>
+            <button onClick={() => navigate('/certificates')} style={styles.viewAllBtn}>View All</button>
           </div>
           <div style={styles.activitiesList}>
-            <ActivityItem 
-              icon={<RecyclingIcon />} 
-              iconBg="#e6f4ea" 
-              title="Completed: Recycling Basics" 
-              points="+100 Points" 
-              pointsColor="#2e7d32" 
-            />
-            <ActivityItem 
-              icon={<Award size={20} color="#718096" fill="#718096" />} 
-              iconBg="#f1f5f9" 
-              title="Earned: Silver Badge" 
-              points="+200 Points" 
-              pointsColor="#2e7d32" 
-            />
-            <ActivityItem 
-              icon={<WaterIcon />} 
-              iconBg="#e0f2fe" 
-              title="Completed: Water Quiz" 
-              points="+50 Points" 
-              pointsColor="#2e7d32" 
-            />
-            <ActivityItem 
-              icon={<TreeIcon />} 
-              iconBg="#e6f4ea" 
-              title="Joined: Tree Plantation Drive" 
-              points="+150 Points" 
-              pointsColor="#2e7d32" 
-            />
+            <div style={styles.activityRow}>
+              <div style={{ ...styles.activityIcon, backgroundColor: '#EAF5EC' }}>
+                <CheckCircle size={16} color="#2E7D32" />
+              </div>
+              <div style={styles.activityBody}>
+                <span style={styles.activityTitle}>Completed quiz on Air Pollution</span>
+                <span style={styles.activityTime}>2 hours ago</span>
+              </div>
+              <span style={styles.activityPoints}>+50 Points</span>
+            </div>
+
+            <div style={styles.activityRow}>
+              <div style={{ ...styles.activityIcon, backgroundColor: '#E0F2FE' }}>
+                <Award size={16} color="#0284C7" />
+              </div>
+              <div style={styles.activityBody}>
+                <span style={styles.activityTitle}>Earned badge "Water Saver"</span>
+                <span style={styles.activityTime}>Yesterday</span>
+              </div>
+              <span style={styles.activityPoints}>+100 Points</span>
+            </div>
+
+            <div style={styles.activityRow}>
+              <div style={{ ...styles.activityIcon, backgroundColor: '#FAF5FF' }}>
+                <BookOpen size={16} color="#9F7AEA" />
+              </div>
+              <div style={styles.activityBody}>
+                <span style={styles.activityTitle}>Completed module on Recycling</span>
+                <span style={styles.activityTime}>2 days ago</span>
+              </div>
+              <span style={styles.activityPoints}>+75 Points</span>
+            </div>
+
+            <div style={styles.activityRow}>
+              <div style={{ ...styles.activityIcon, backgroundColor: '#FFF5F5' }}>
+                <Trophy size={16} color="#E53E3E" />
+              </div>
+              <div style={styles.activityBody}>
+                <span style={styles.activityTitle}>Reached Level 4</span>
+                <span style={styles.activityTime}>3 days ago</span>
+              </div>
+              <span style={styles.activityPoints}>+200 Points</span>
+            </div>
+
+            {/* Additional Activities */}
+            <div style={styles.activityRow}>
+              <div style={{ ...styles.activityIcon, backgroundColor: '#E6F4EA' }}>
+                <Leaf size={16} color="#2E7D32" />
+              </div>
+              <div style={styles.activityBody}>
+                <span style={styles.activityTitle}>Watered Virtual Tree</span>
+                <span style={styles.activityTime}>4 hours ago</span>
+              </div>
+              <span style={styles.activityPoints}>+15 Points</span>
+            </div>
+
+            <div style={styles.activityRow}>
+              <div style={{ ...styles.activityIcon, backgroundColor: '#FEF3C7' }}>
+                <Flame size={16} color="#D97706" />
+              </div>
+              <div style={styles.activityBody}>
+                <span style={styles.activityTitle}>Answered Sunlight Trivia correctly</span>
+                <span style={styles.activityTime}>Today</span>
+              </div>
+              <span style={styles.activityPoints}>+50 Points</span>
+            </div>
+
+            <div style={styles.activityRow}>
+              <div style={{ ...styles.activityIcon, backgroundColor: '#EBF8FF' }}>
+                <Gift size={16} color="#3182CE" />
+              </div>
+              <div style={styles.activityBody}>
+                <span style={styles.activityTitle}>Purchased Sprout from Reward Shop</span>
+                <span style={styles.activityTime}>Yesterday</span>
+              </div>
+              <span style={{ ...styles.activityPoints, color: '#E53E3E' }}>-30 Coins</span>
+            </div>
           </div>
         </div>
+
+        {/* Card E: Virtual Tree Nurturing */}
+        <div style={{ ...styles.gridCard, flex: 1.2 }}>
+          <h3 style={styles.cardHeader}>🌳 Virtual Tree Growth</h3>
+          
+          <div style={styles.treeSectionContainer}>
+            {/* Tree display animation */}
+            <div style={styles.treeEmojiWrapper}>
+              <motion.div
+                animate={isRotatingAuto ? { 
+                  rotateY: [manualRotation, manualRotation + 360], 
+                  y: [0, -5, 0] 
+                } : { 
+                  rotateY: manualRotation,
+                  y: [0, -5, 0] 
+                }}
+                transition={{ 
+                  rotateY: { repeat: isRotatingAuto ? Infinity : 0, duration: 12, ease: "linear" },
+                  y: { repeat: Infinity, duration: 3, ease: "easeInOut" }
+                }}
+                style={styles.tree3DBox}
+              >
+                <span style={styles.treeEmoji}>{treeInfo?.imageUrl || '🌳'}</span>
+              </motion.div>
+              
+              {/* Rotation controls */}
+              <div style={styles.rotRow}>
+                <button onClick={() => { setIsRotatingAuto(false); setManualRotation(r => r - 45); }} style={styles.rotBtn}>↺</button>
+                <button onClick={() => setIsRotatingAuto(!isRotatingAuto)} style={{ ...styles.rotBtn, fontSize: '0.65rem' }}>
+                  {isRotatingAuto ? 'Stop' : 'Auto'}
+                </button>
+                <button onClick={() => { setIsRotatingAuto(false); setManualRotation(r => r + 45); }} style={styles.rotBtn}>↻</button>
+              </div>
+            </div>
+
+            {/* Tree Info Details */}
+            <div style={styles.treeDetails}>
+              <span style={styles.stageTitle}>Stage: {treeInfo?.stageName || 'Seed'}</span>
+              <span style={styles.stageLevel}>Growth level {treeInfo?.level || 1}</span>
+              <div style={styles.treeProgressTrack}>
+                <div style={{ ...styles.treeProgressBar, width: `${treeInfo?.progressPercent || 0}%` }} />
+              </div>
+              <span style={styles.xpLabel}>
+                {treeInfo?.currentXp || displayXp} / {treeInfo?.nextStageXp || 200} XP to next stage ({Math.round(treeInfo?.progressPercent || 0)}%)
+              </span>
+            </div>
+          </div>
+
+          <div style={styles.dividerLine} />
+
+          {/* Tree interactive controls or trivia */}
+          {currentTrivia ? (
+            <div style={styles.treeTriviaBox}>
+              <div style={styles.triviaHeaderRow}>
+                <span style={styles.triviaTitle}>☀️ Daily Sunlight Trivia</span>
+                <button onClick={() => setCurrentTrivia(null)} style={styles.triviaCloseBtn}>✕</button>
+              </div>
+              <p style={styles.triviaText}>{currentTrivia.q}</p>
+              <div style={styles.triviaOptsGrid}>
+                {currentTrivia.options.map((opt, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => handleTriviaAnswer(idx)} 
+                    style={{
+                      ...styles.triviaOptBtn,
+                      borderColor: triviaFeedback && idx === currentTrivia.correctIdx ? '#48BB78' : '#C8E6C9',
+                      backgroundColor: triviaFeedback && idx === currentTrivia.correctIdx ? '#E6F4EA' : '#FFFFFF'
+                    }}
+                    disabled={triviaSuccess}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+              {triviaFeedback && (
+                <span style={{
+                  ...styles.triviaFeedbackText,
+                  color: triviaSuccess ? '#2E7D32' : '#E53E3E'
+                }}>
+                  {triviaFeedback}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div style={styles.nurtureControls}>
+              <span style={styles.nurtureTitle}>Nurture & Play Actions</span>
+              <div style={styles.nurtureButtonsRow}>
+                <button onClick={handleWaterTree} style={styles.nurtureBtn}>
+                  💧 Water (-5 🪙)
+                </button>
+                <button onClick={handleFertilizeTree} style={styles.nurtureBtn}>
+                  🌿 Fertilize (-10 🪙)
+                </button>
+                {getSunlightCooldownString() ? (
+                  <button style={{ ...styles.nurtureBtn, backgroundColor: '#EDF2F7', color: '#718096', border: '1px solid #CBD5E0', cursor: 'not-allowed' }} disabled>
+                    ☀️ Cooldown: {getSunlightCooldownString()}
+                  </button>
+                ) : (
+                  <button onClick={startTrivia} style={{ ...styles.nurtureBtn, backgroundColor: '#FEF3C7', color: '#D97706', borderColor: '#FCD34D' }}>
+                    ☀️ Sunlight Trivia (+50 XP)
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Card F: Quick Access & Quote Banner */}
+        <div style={{ ...styles.gridCard, flex: 1, padding: 0, border: 'none', backgroundColor: 'transparent', gap: '20px', display: 'flex', flexDirection: 'column' }}>
+          
+          {/* Quick Access Card */}
+          <div style={styles.quickAccessCard}>
+            <h3 style={{ ...styles.cardHeader, marginBottom: '16px' }}>Quick Access</h3>
+            <div style={styles.quickAccessGrid}>
+              <button onClick={() => navigate('/courses')} style={styles.quickActionBtn}>
+                <div style={{ ...styles.quickIconCircle, backgroundColor: '#FAF5FF' }}>
+                  <HelpCircle size={18} color="#9F7AEA" />
+                </div>
+                <span style={styles.quickActionLabel}>Take Quiz</span>
+              </button>
+
+              <button onClick={() => navigate('/courses')} style={styles.quickActionBtn}>
+                <div style={{ ...styles.quickIconCircle, backgroundColor: '#EBF8FF' }}>
+                  <BookOpen size={18} color="#3182CE" />
+                </div>
+                <span style={styles.quickActionLabel}>Learn More</span>
+              </button>
+
+              <button onClick={() => navigate('/shop')} style={styles.quickActionBtn}>
+                <div style={{ ...styles.quickIconCircle, backgroundColor: '#FFF7ED' }}>
+                  <Gift size={18} color="#EA580C" />
+                </div>
+                <span style={styles.quickActionLabel}>Earn Rewards</span>
+              </button>
+
+              <button onClick={() => navigate('/leaderboard')} style={styles.quickActionBtn}>
+                <div style={{ ...styles.quickIconCircle, backgroundColor: '#EAF5EC' }}>
+                  <Users size={18} color="#2E7D32" />
+                </div>
+                <span style={styles.quickActionLabel}>Leaderboard</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Quote Green Banner */}
+          <div style={styles.quoteBanner}>
+            <div style={styles.quoteLeft}>
+              <div style={styles.sproutGroup}>
+                <span style={{ fontSize: '1.2rem' }}>🌱</span>
+                <span style={{ fontSize: '1rem', marginLeft: '-4px' }}>🌱</span>
+              </div>
+              <p style={styles.quoteText}>
+                Small steps today<br />
+                <strong>Big change tomorrow 🌍</strong>
+              </p>
+            </div>
+          </div>
+
+        </div>
+
       </div>
 
-      {/* Row 4: Quick Actions */}
-      <div style={styles.quickActionsContainer}>
-        <h2 style={styles.quickActionsTitle}>Quick Actions</h2>
-        <div style={styles.quickActionsGrid}>
-          <QuickActionCard 
-            icon={<HelpCircle size={22} color="#ffffff" />} 
-            iconBg="#3b82f6" 
-            title="Take Quiz" 
-            desc="Test your knowledge" 
-            onClick={() => navigate('/courses')}
-          />
-          <QuickActionCard 
-            icon={<Trophy size={22} color="#ffffff" />} 
-            iconBg="#10b981" 
-            title="Join Challenge" 
-            desc="Compete & win" 
-            onClick={() => navigate('/challenges')}
-          />
-          <QuickActionCard 
-            icon={<FileText size={22} color="#ffffff" />} 
-            iconBg="#b45309" 
-            title="Read Articles" 
-            desc="Learn more" 
-            onClick={() => navigate('/courses')}
-          />
-          <QuickActionCard 
-            icon={<Play size={22} color="#ffffff" fill="#ffffff" />} 
-            iconBg="#eab308" 
-            title="Watch Videos" 
-            desc="Educational videos" 
-            onClick={() => window.open('https://youtu.be/XGIQPyQe4T4?si=HT5Y3VBZ0sp78U37', '_blank')}
-          />
-        </div>
-      </div>
     </div>
   );
 }
 
 const styles = {
-  dashboardPage: {
-    backgroundColor: '#FAFBFB',
-    minHeight: '100vh',
+  dashboardContainer: {
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
+    backgroundColor: '#F7F9FA',
+    minHeight: 'calc(100vh - 70px)',
+    padding: '8px 4px 24px 4px',
+    fontFamily: 'inherit',
   },
-  floatingMenuBtn: {
-    position: 'fixed',
-    top: '20px',
-    left: '20px',
-    zIndex: 900,
-    backgroundColor: '#FFFFFF',
-    border: '1px solid rgba(0,0,0,0.06)',
-    borderRadius: '8px',
-    width: '40px',
-    height: '40px',
+  heroBanner: {
+    // Gradient changed from lavender/blue to matches light green theme
+    background: 'linear-gradient(135deg, #F1FAF5 0%, #EAF5EC 100%)',
+    borderRadius: '24px',
+    padding: '32px 40px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
-  },
-  headerContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '12px',
-    margin: '10px 0 20px 0',
-  },
-  mainTitle: {
-    fontSize: '2.5rem',
-    fontWeight: '800',
-    color: '#0F3A20',
-    textAlign: 'center',
-    letterSpacing: '-0.5px',
-  },
-  topCardsGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr',
-    gap: '20px',
-    marginBottom: '28px',
-  },
-  statCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    padding: '20px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
-    border: '2px solid #7FB77E',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    transition: 'all 0.2s ease',
-    cursor: 'pointer',
-  },
-  statIconWrapper: {
-    width: '48px',
-    height: '48px',
-    borderRadius: '12px',
-    backgroundColor: '#e6f4ea',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  statContent: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  statLabel: {
-    fontSize: '0.85rem',
-    fontWeight: '500',
-    color: '#718096',
-  },
-  statValue: {
-    fontSize: '1.4rem',
-    fontWeight: '800',
-    color: '#1a202c',
-    lineHeight: '1.2',
-    margin: '2px 0',
-  },
-  statSubtext: {
-    fontSize: '0.75rem',
-    fontWeight: '500',
-    color: '#718096',
-  },
-  userCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    padding: '20px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
-    border: '2px solid #7FB77E',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    gap: '12px',
-    transition: 'all 0.2s ease',
-    cursor: 'pointer',
-  },
-  userAvatar: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    border: '2px solid #2e7d32',
-  },
-  userInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '100%',
-  },
-  userName: {
-    fontSize: '1.1rem',
-    fontWeight: '700',
-    color: '#1a202c',
-  },
-  userTitle: {
-    fontSize: '0.8rem',
-    fontWeight: '500',
-    color: '#718096',
-    marginBottom: '6px',
-  },
-  userProgressContainer: {
-    height: '6px',
-    backgroundColor: '#edf2f7',
-    borderRadius: '3px',
-    overflow: 'hidden',
-    marginBottom: '4px',
-  },
-  userProgressBar: {
-    height: '100%',
-    backgroundColor: '#2e7d32',
-    borderRadius: '3px',
-  },
-  userProgressLabel: {
-    fontSize: '0.75rem',
-    fontWeight: '600',
-    color: '#4a5568',
-  },
-  middleRowGrid: {
-    display: 'grid',
-    gridTemplateColumns: '2fr 1fr',
-    gap: '20px',
-  },
-  saveEarthCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    padding: '24px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
-    border: '2px solid #7FB77E',
-    display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    boxShadow: '0 8px 24px rgba(46, 125, 50, 0.04)',
     overflow: 'hidden',
+    border: '1px solid #C8E6C9',
   },
-  saveEarthLeft: {
+  heroLeft: {
     display: 'flex',
     flexDirection: 'column',
-    flex: 1,
-    gap: '16px',
+    flex: 1.2,
   },
-  cardTitle: {
-    fontSize: '1.2rem',
-    fontWeight: '700',
-    color: '#1a202c',
-  },
-  saveEarthProgressInfo: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  saveEarthLevel: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    color: '#4a5568',
-  },
-  saveEarthProgressWrapper: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-  },
-  saveEarthProgressBarOuter: {
-    flex: 1,
-    height: '14px',
-    backgroundColor: '#edf2f7',
-    borderRadius: '7px',
-    overflow: 'hidden',
-  },
-  saveEarthProgressBarInner: {
-    height: '100%',
-    backgroundColor: '#2e7d32',
-    borderRadius: '7px',
-  },
-  saveEarthPercent: {
-    fontSize: '0.95rem',
-    fontWeight: '700',
-    color: '#2e7d32',
-  },
-  saveEarthRight: {
-    flexShrink: 0,
-    width: '130px',
-    height: '130px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  globeImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-  },
-  dailyChallengeCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    padding: '24px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
-    border: '2px solid #7FB77E',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    gap: '16px',
-  },
-  challengeInfo: {
-    display: 'flex',
-    gap: '16px',
-    alignItems: 'center',
-  },
-  challengeIconWrapper: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '50%',
-    backgroundColor: '#2e7d32',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  challengeText: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  challengeName: {
-    fontSize: '1.1rem',
-    fontWeight: '700',
-    color: '#1a202c',
-  },
-  challengeDesc: {
-    fontSize: '0.85rem',
-    color: '#718096',
-    margin: '2px 0 6px 0',
-  },
-  challengeReward: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  rewardLabel: {
-    fontSize: '0.8rem',
-    fontWeight: '600',
-    color: '#4a5568',
-  },
-  rewardItem: {
-    fontSize: '0.85rem',
-    fontWeight: '700',
-    color: '#1a202c',
-  },
-  startBtn: {
-    backgroundColor: '#2e7d32',
-    color: '#FFFFFF',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '10px 20px',
-    fontWeight: '700',
-    fontSize: '0.9rem',
-    cursor: 'pointer',
-    alignSelf: 'flex-end',
-    transition: 'background-color 0.2s ease',
-  },
-  bottomRowGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr',
-    gap: '20px',
-  },
-  learningCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    padding: '24px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
-    border: '2px solid #7FB77E',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '14px',
-  },
-  learningContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    textAlign: 'center',
-    gap: '8px',
-  },
-  recyclingImage: {
-    width: '100%',
-    height: '140px',
-    objectFit: 'contain',
-    borderRadius: '12px',
-    marginBottom: '10px',
-  },
-  learningName: {
-    fontSize: '1.1rem',
-    fontWeight: '700',
-    color: '#1a202c',
-  },
-  learningDesc: {
-    fontSize: '0.85rem',
-    color: '#718096',
-  },
-  learningProgressWrapper: {
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginTop: '6px',
-  },
-  learningProgressBarOuter: {
-    flex: 1,
-    height: '10px',
-    backgroundColor: '#edf2f7',
-    borderRadius: '5px',
-    overflow: 'hidden',
-  },
-  learningProgressBarInner: {
-    height: '100%',
-    backgroundColor: '#2e7d32',
-    borderRadius: '5px',
-  },
-  learningPercent: {
-    fontSize: '0.85rem',
-    fontWeight: '700',
-    color: '#2e7d32',
-  },
-  badgesCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    padding: '24px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
-    border: '2px solid #7FB77E',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  badgesWrapper: {
-    display: 'flex',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    height: '100%',
-    paddingBottom: '20px',
-  },
-  badgeItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '6px',
-  },
-  medalIcon: {
-    width: '50px',
-    height: '50px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeName: {
-    fontSize: '0.9rem',
-    fontWeight: '700',
-    color: '#1a202c',
-  },
-  badgeLabel: {
-    fontSize: '0.75rem',
-    color: '#718096',
-  },
-  activitiesCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    padding: '24px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
-    border: '2px solid #7FB77E',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    gap: '16px',
-  },
-  activitiesHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  viewAllLink: {
-    background: 'none',
-    border: 'none',
-    fontSize: '0.85rem',
-    fontWeight: '700',
-    color: '#2e7d32',
-    cursor: 'pointer',
-  },
-  activitiesList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  activityItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '14px',
-    padding: '4px 0',
-  },
-  activityIconWrapper: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  activityText: {
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: '0.85rem',
-    fontWeight: '600',
-    color: '#2d3748',
-  },
-  activityPoints: {
-    fontSize: '0.8rem',
-    fontWeight: '700',
-    marginTop: '2px',
-  },
-  quickActionsContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-    marginTop: '10px',
-  },
-  quickActionsTitle: {
-    fontSize: '1.25rem',
-    fontWeight: '700',
-    color: '#1a202c',
-  },
-  quickActionsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '20px',
-  },
-  quickActionCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    padding: '20px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
-    border: '2px solid #7FB77E',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    cursor: 'pointer',
-    position: 'relative',
-    transition: 'all 0.2s ease',
-  },
-  quickActionIconWrapper: {
-    width: '44px',
-    height: '44px',
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  quickActionContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    paddingRight: '24px',
-  },
-  quickActionTitle: {
-    fontSize: '0.95rem',
-    fontWeight: '700',
-    color: '#1a202c',
-  },
-  quickActionDesc: {
-    fontSize: '0.75rem',
-    color: '#718096',
-    marginTop: '2px',
-  },
-  quickActionArrow: {
-    position: 'absolute',
-    bottom: '16px',
-    right: '16px',
-  },
-  reserveSectionGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '20px',
-    marginTop: '10px',
-  },
-  reserveCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #EADBCE',
-    borderRadius: '20px',
-    padding: '24px',
-    boxShadow: '0 4px 12px rgba(139, 107, 74, 0.03)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-    minHeight: '230px',
-  },
-  treeDisplayArea: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-  },
-  treeEmojiWrapper: {
-    width: '80px',
-    height: '80px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F4F9F4',
-    borderRadius: '50%',
-    flexShrink: 0,
-  },
-  treeDetails: {
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-  },
-  treeStageTitle: {
-    fontSize: '1.15rem',
-    fontWeight: '800',
-    color: '#1b4d2c',
-  },
-  treeStageSub: {
-    fontSize: '0.8rem',
-    color: '#A39387',
-    fontWeight: '600',
-    marginTop: '2px',
-  },
-  treeProgressOuter: {
-    height: '10px',
-    backgroundColor: '#F8F5F1',
-    borderRadius: '5px',
-    overflow: 'hidden',
-    marginTop: '12px',
-  },
-  treeProgressInner: {
-    height: '100%',
-    backgroundColor: '#7FB77E',
-    borderRadius: '5px',
-    transition: 'width 0.4s ease',
-  },
-  treeXpLabel: {
-    fontSize: '0.75rem',
-    color: '#8B6B4A',
-    fontWeight: '700',
-    marginTop: '6px',
-  },
-  gardenPreviewArea: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    flex: 1,
-  },
-  miniGardenLandscape: {
-    height: '90px',
-    backgroundColor: '#D0E8C4',
-    borderRadius: '12px',
-    position: 'relative',
-    overflow: 'hidden',
-    border: '1px solid #EADBCE',
-  },
-  miniPond: {
-    position: 'absolute',
-    width: '40px',
-    height: '30px',
-    backgroundColor: '#A0C4DF',
-    borderRadius: '50%',
-    bottom: '10px',
-    left: '10px',
-    opacity: 0.7,
-  },
-  gardenPreviewDetails: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-  },
-  gardenCompletionLabel: {
-    fontSize: '0.8rem',
-    fontWeight: '700',
-    color: '#A39387',
-  },
-  gardenCompletionVal: {
+  welcomeLabel: {
     fontSize: '1rem',
     fontWeight: '800',
-    color: '#1b4d2c',
+    color: '#111827',
   },
-  reserveCardBtn: {
-    backgroundColor: '#F4F9F4',
-    border: '1px solid #7FB77E',
-    color: '#1b4d2c',
-    borderRadius: '10px',
-    padding: '8px 12px',
-    fontWeight: '700',
-    fontSize: '0.8rem',
-    cursor: 'pointer',
+  heroTitle: {
+    fontSize: '2.2rem',
+    fontWeight: '950',
+    color: '#111827',
+    margin: '4px 0 10px 0',
+  },
+  heroDesc: {
+    fontSize: '1rem',
+    fontWeight: '800',
+    color: '#111827',
+  },
+  heroCenter: {
     display: 'flex',
-    alignItems: 'center',
+    gap: '16px',
     justifyContent: 'center',
-    gap: '8px',
-    transition: 'all 0.2s',
+    alignItems: 'center',
+    flex: 1.5,
+    padding: '0 20px',
   },
-  shopShortcutArea: {
+  miniStatBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    border: '1px solid #C8E6C9',
+    borderRadius: '16px',
+    padding: '12px 16px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    textAlign: 'center',
-    gap: '10px',
-    flex: 1,
-    justifyContent: 'center',
+    gap: '4px',
+    minWidth: '110px',
+    boxShadow: '0 4px 12px rgba(46, 125, 50, 0.05)',
   },
-  shopIconCircle: {
-    width: '50px',
-    height: '50px',
-    borderRadius: '50%',
-    backgroundColor: 'rgba(127,183,126,0.15)',
+  miniStatLabel: {
+    fontSize: '0.7rem',
+    fontWeight: '850',
+    color: '#0F5132',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  miniStatVal: {
+    fontSize: '0.92rem',
+    fontWeight: '900',
+    color: '#111827',
+  },
+  heroRight: {
+    width: '180px',
+    height: '180px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+    flex: 0.8,
   },
-  shopShortcutDesc: {
-    fontSize: '0.75rem',
-    color: '#6E5C50',
-    lineHeight: '1.4',
+  heroImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
   },
-  shopBtnPrimary: {
-    backgroundColor: '#1b4d2c',
-    color: '#FFFFFF',
-    border: 'none',
-    borderRadius: '10px',
-    padding: '8px 16px',
-    fontWeight: '700',
-    fontSize: '0.8rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    transition: 'all 0.2s',
-  },
-  eventsMissionsGrid: {
+  metricsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 2fr 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
     gap: '20px',
-    marginTop: '10px',
   },
-  eventsColumn: {
+  metricCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #EADBCE',
     borderRadius: '20px',
     padding: '24px',
-    boxShadow: '0 4px 12px rgba(139, 107, 74, 0.03)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    boxShadow: '0 4px 18px rgba(0, 0, 0, 0.02)',
+    border: '1px solid #C8E6C9',
+  },
+  iconContainer: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '14px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  metricDetails: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+  },
+  metricLabel: {
+    fontSize: '0.82rem',
+    fontWeight: '800',
+    color: '#111827',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  metricValue: {
+    fontSize: '1.35rem',
+    fontWeight: '900',
+    color: '#111827',
+    margin: '3px 0',
+  },
+  metricSubtext: {
+    fontSize: '0.78rem',
+    fontWeight: '800',
+    color: '#111827',
+  },
+  progressTrack: {
+    width: '100%',
+    height: '6px',
+    backgroundColor: '#EDF2F7',
+    borderRadius: '3px',
+    overflow: 'hidden',
+    margin: '6px 0',
+  },
+  progressBar: {
+    height: '100%',
+    borderRadius: '3px',
+  },
+  eventsMissionsRow: {
+    display: 'flex',
+    gap: '20px',
+    flexWrap: 'wrap',
   },
   eventsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '12px',
   },
   eventCard: {
     display: 'flex',
     gap: '16px',
-    border: '1px solid #EADBCE',
+    border: '1px solid #C8E6C9',
     borderRadius: '16px',
-    overflow: 'hidden',
-    backgroundColor: '#FAF8F5',
+    padding: '12px',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
   },
   eventBanner: {
-    width: '150px',
-    height: '110px',
+    width: '100px',
+    height: '80px',
+    borderRadius: '10px',
     objectFit: 'cover',
     flexShrink: 0,
   },
   eventInfo: {
-    padding: '12px 16px 12px 0',
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    flex: 1,
-    justifyContent: 'space-between',
   },
   eventHeaderRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: '6px',
+    gap: '4px',
   },
   eventTitle: {
-    fontSize: '1rem',
-    fontWeight: '700',
-    color: '#2D241E',
+    fontSize: '0.9rem',
+    fontWeight: '900',
+    color: '#111827',
+    margin: 0,
   },
   eventBadgeReward: {
-    fontSize: '0.75rem',
-    backgroundColor: 'rgba(217,119,6,0.1)',
-    color: '#d97706',
-    fontWeight: '700',
+    fontSize: '0.72rem',
+    fontWeight: '800',
+    color: '#3182CE',
+    backgroundColor: '#EBF8FF',
     padding: '2px 8px',
-    borderRadius: '6px',
+    borderRadius: '10px',
   },
   eventDesc: {
-    fontSize: '0.75rem',
-    color: '#6E5C50',
-    lineHeight: '1.4',
+    fontSize: '0.78rem',
+    color: '#111827',
+    margin: '4px 0 8px 0',
+    lineHeight: '1.3',
+    fontWeight: '700',
   },
   eventMetaRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '4px',
   },
   eventRewards: {
     display: 'flex',
     gap: '10px',
   },
   eventRewardItem: {
-    fontSize: '0.75rem',
-    fontWeight: '700',
-    color: '#7FB77E',
+    fontSize: '0.72rem',
+    fontWeight: '800',
+    color: '#0F5132',
   },
   eventDate: {
-    fontSize: '0.7rem',
-    color: '#A39387',
-    fontWeight: '600',
+    fontSize: '0.72rem',
+    fontWeight: '800',
+    color: '#111827',
   },
   emptyState: {
     display: 'flex',
@@ -1590,33 +1056,21 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '40px 20px',
-    textAlign: 'center',
-    gap: '12px',
-    color: '#A39387',
-  },
-  missionsColumn: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #EADBCE',
-    borderRadius: '20px',
-    padding: '24px',
-    boxShadow: '0 4px 12px rgba(139, 107, 74, 0.03)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
+    color: '#111827',
   },
   missionsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '12px',
   },
   missionCard: {
-    border: '1px solid #EADBCE',
-    borderRadius: '12px',
-    padding: '12px 14px',
+    border: '1px solid #C8E6C9',
+    borderRadius: '16px',
+    padding: '12px',
+    backgroundColor: '#FFFFFF',
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
-    backgroundColor: '#FFFFFF',
+    gap: '6px',
   },
   missionHeader: {
     display: 'flex',
@@ -1624,20 +1078,21 @@ const styles = {
     gap: '8px',
   },
   missionCheckbox: {
-    width: '16px',
-    height: '16px',
-    border: '1.5px solid #A39387',
+    width: '18px',
+    height: '18px',
     borderRadius: '4px',
+    border: '1.5px solid #111827',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '0.65rem',
-    fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#48BB78',
+    fontSize: '0.7rem',
+    fontWeight: 'bold',
+    flexShrink: 0,
   },
   missionTitle: {
-    fontSize: '0.8rem',
-    fontWeight: '700',
+    fontSize: '0.82rem',
+    fontWeight: '800',
   },
   missionProgressRow: {
     display: 'flex',
@@ -1647,101 +1102,397 @@ const styles = {
   missionProgressOuter: {
     flex: 1,
     height: '6px',
-    backgroundColor: '#F8F5F1',
+    backgroundColor: '#EDF2F7',
     borderRadius: '3px',
     overflow: 'hidden',
   },
   missionProgressInner: {
     height: '100%',
-    backgroundColor: '#7FB77E',
+    backgroundColor: '#48BB78',
     borderRadius: '3px',
-    transition: 'width 0.4s ease',
   },
   missionProgressLabel: {
-    fontSize: '0.7rem',
-    color: '#8B6B4A',
-    fontWeight: '700',
+    fontSize: '0.74rem',
+    fontWeight: '800',
+    color: '#111827',
+    flexShrink: 0,
   },
   missionRewards: {
     display: 'flex',
-    gap: '8px',
+    gap: '10px',
   },
   missionRewardVal: {
-    fontSize: '0.7rem',
-    fontWeight: '700',
-    color: '#1b4d2c',
+    fontSize: '0.72rem',
+    fontWeight: '800',
+    color: '#0F5132',
   },
-  rotateBtn: {
-    width: '30px',
-    height: '30px',
-    borderRadius: '50%',
-    border: '1px solid #EADBCE',
+  middleRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    gap: '20px',
+  },
+  gridCard: {
     backgroundColor: '#FFFFFF',
-    color: '#2D241E',
-    fontSize: '0.85rem',
+    borderRadius: '20px',
+    padding: '24px',
+    boxShadow: '0 4px 18px rgba(0, 0, 0, 0.02)',
+    border: '1px solid #C8E6C9',
+  },
+  cardHeader: {
+    fontSize: '1.05rem',
+    fontWeight: '900',
+    color: '#111827',
+    margin: '0 0 20px 0',
+  },
+  headerWithAction: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  viewAllBtn: {
+    fontSize: '0.82rem',
+    fontWeight: '800',
+    color: '#3182CE',
+    background: 'none',
+    border: 'none',
     cursor: 'pointer',
+    padding: '4px 8px',
+    borderRadius: '6px',
+    transition: 'background-color 0.2s',
+  },
+  progressContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '24px',
+  },
+  circularWrapper: {
+    flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
-    transition: 'all 0.2s',
   },
-  gameDivider: {
-    height: '1px',
-    backgroundColor: '#EADBCE',
-    margin: '12px 0 6px 0',
+  gaugeText: {
+    fontSize: '1.45rem',
+    fontWeight: '900',
+    fill: '#0F5132',
   },
-  gameActionsArea: {
+  gaugeLabel: {
+    fontSize: '0.52rem',
+    fontWeight: '900',
+    fill: '#111827',
+    textTransform: 'uppercase',
+  },
+  topicsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    flex: 1,
+  },
+  topicItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+  },
+  topicHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontSize: '0.78rem',
+    fontWeight: '800',
+    color: '#111827',
+  },
+  topicName: {
+    color: '#111827',
+  },
+  topicPercent: {
+    color: '#111827',
+  },
+  topicTrack: {
+    width: '100%',
+    height: '6px',
+    backgroundColor: '#EDF2F7',
+    borderRadius: '3px',
+    overflow: 'hidden',
+  },
+  topicBar: {
+    height: '100%',
+    borderRadius: '3px',
+  },
+  badgesContainer: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: 'calc(100% - 40px)',
+    padding: '10px 0',
+  },
+  badgeCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    gap: '8px',
+  },
+  badgeTitle: {
+    fontSize: '0.82rem',
+    fontWeight: '800',
+    color: '#111827',
+  },
+  badgeStatus: {
+    fontSize: '0.72rem',
+    fontWeight: '800',
+    color: '#0F5132',
+    backgroundColor: '#E6F4EA',
+    padding: '2px 8px',
+    borderRadius: '12px',
+  },
+  leaderboardList: {
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
   },
-  gameSectionLabel: {
-    fontSize: '0.8rem',
-    fontWeight: '700',
-    color: '#8B6B4A',
-    textTransform: 'uppercase',
-  },
-  gameButtonsRow: {
+  leaderboardRow: {
     display: 'flex',
-    gap: '10px',
+    alignItems: 'center',
+    padding: '8px 12px',
+    borderRadius: '12px',
+    transition: 'all 0.2s',
+  },
+  leaderboardRank: {
+    width: '28px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  medal: {
+    width: '20px',
+    height: '20px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.75rem',
+    fontWeight: '800',
+  },
+  rankNum: {
+    fontSize: '0.8rem',
+    fontWeight: '800',
+    color: '#111827',
+  },
+  lbAvatar: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    margin: '0 12px',
+    backgroundColor: '#E2E8F0',
+  },
+  lbInfo: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  lbName: {
+    fontSize: '0.85rem',
+    color: '#111827',
+  },
+  youTag: {
+    fontSize: '0.72rem',
+    fontWeight: '800',
+    color: '#48BB78',
+    marginLeft: '4px',
+  },
+  lbPoints: {
+    fontSize: '0.85rem',
+  },
+  bottomRow: {
+    display: 'flex',
+    gap: '20px',
     flexWrap: 'wrap',
   },
-  gameBtn: {
+  activitiesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '14px',
+  },
+  activityRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+  },
+  activityIcon: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  activityBody: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+  },
+  activityTitle: {
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    color: '#111827',
+  },
+  activityTime: {
+    fontSize: '0.75rem',
+    fontWeight: '700',
+    color: '#4A5568',
+    marginTop: '2px',
+  },
+  activityPoints: {
+    fontSize: '0.85rem',
+    fontWeight: '800',
+    color: '#2E7D32',
+  },
+  treeSectionContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  treeEmojiWrapper: {
+    flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px',
+  },
+  tree3DBox: {
+    width: '60px',
+    height: '60px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    perspective: '800px',
+    transformStyle: 'preserve-3d',
+  },
+  treeEmoji: {
+    fontSize: '3.2rem',
+    display: 'inline-block',
+  },
+  rotRow: {
+    display: 'flex',
+    gap: '4px',
+  },
+  rotBtn: {
+    border: '1px solid #C8E6C9',
+    borderRadius: '6px',
+    backgroundColor: '#FAFDFB',
+    color: '#0F5132',
+    fontSize: '0.75rem',
+    padding: '2px 6px',
+    cursor: 'pointer',
+    fontWeight: '700',
+  },
+  treeDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+  },
+  stageTitle: {
+    fontSize: '0.88rem',
+    fontWeight: '800',
+    color: '#111827',
+  },
+  stageLevel: {
+    fontSize: '0.74rem',
+    fontWeight: '700',
+    color: '#111827',
+    marginTop: '1px',
+  },
+  treeProgressTrack: {
+    width: '100%',
+    height: '6px',
+    backgroundColor: '#EDF2F7',
+    borderRadius: '3px',
+    overflow: 'hidden',
+    margin: '6px 0',
+  },
+  treeProgressBar: {
+    height: '100%',
+    backgroundColor: '#48BB78',
+    borderRadius: '3px',
+  },
+  xpLabel: {
+    fontSize: '0.72rem',
+    fontWeight: '700',
+    color: '#111827',
+  },
+  dividerLine: {
+    height: '1px',
+    backgroundColor: '#EAECEF',
+    margin: '16px 0',
+  },
+  nurtureControls: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  nurtureTitle: {
+    fontSize: '0.76rem',
+    fontWeight: '800',
+    color: '#111827',
+    textTransform: 'uppercase',
+  },
+  nurtureButtonsRow: {
+    display: 'flex',
+    gap: '8px',
+    flexWrap: 'wrap',
+  },
+  nurtureBtn: {
     flex: 1,
     minWidth: '95px',
     padding: '8px 12px',
     borderRadius: '10px',
-    border: '1px solid #7FB77E',
-    backgroundColor: '#F4F9F4',
-    color: '#1b4d2c',
+    border: '1px solid #C8E6C9',
+    backgroundColor: '#F4FBF5',
+    color: '#0F5132',
     fontSize: '0.75rem',
-    fontWeight: '700',
+    fontWeight: '800',
     cursor: 'pointer',
     textAlign: 'center',
     transition: 'all 0.2s',
   },
-  triviaContainer: {
-    backgroundColor: '#FAF8F5',
-    border: '1px solid #EADBCE',
-    borderRadius: '12px',
-    padding: '12px',
+  treeTriviaBox: {
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
+    backgroundColor: '#F8FAFC',
+    border: '1px solid #C8E6C9',
+    borderRadius: '12px',
+    padding: '12px',
+  },
+  triviaHeaderRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   triviaTitle: {
-    fontSize: '0.85rem',
-    fontWeight: '800',
-    color: '#b45309',
+    fontSize: '0.78rem',
+    fontWeight: '900',
+    color: '#D97706',
     textTransform: 'uppercase',
   },
-  triviaQ: {
-    fontSize: '0.8rem',
+  triviaCloseBtn: {
+    background: 'none',
+    border: 'none',
+    fontSize: '0.85rem',
     fontWeight: '700',
-    color: '#2D241E',
+    color: '#111827',
+    cursor: 'pointer',
   },
-  triviaOptionsList: {
+  triviaText: {
+    fontSize: '0.8rem',
+    fontWeight: '800',
+    color: '#111827',
+    margin: '4px 0',
+  },
+  triviaOptsGrid: {
     display: 'flex',
     flexDirection: 'column',
     gap: '6px',
@@ -1750,27 +1501,84 @@ const styles = {
     width: '100%',
     padding: '8px 12px',
     borderRadius: '8px',
-    border: '1px solid #EADBCE',
+    border: '1px solid transparent',
     fontSize: '0.75rem',
-    fontWeight: '600',
-    color: '#2D241E',
+    fontWeight: '700',
+    color: '#111827',
     textAlign: 'left',
     cursor: 'pointer',
     transition: 'all 0.2s',
   },
-  triviaFeedback: {
-    fontSize: '0.75rem',
-    fontWeight: '700',
+  triviaFeedbackText: {
+    fontSize: '0.74rem',
+    fontWeight: '800',
     marginTop: '4px',
   },
-  triviaActionBtn: {
-    padding: '6px 12px',
-    borderRadius: '8px',
-    border: 'none',
-    backgroundColor: '#2e7d32',
-    color: '#FFFFFF',
-    fontSize: '0.75rem',
-    fontWeight: '700',
+  quickAccessCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '20px',
+    padding: '24px',
+    boxShadow: '0 4px 18px rgba(0, 0, 0, 0.02)',
+    border: '1px solid #C8E6C9',
+    flex: 1,
+  },
+  quickAccessGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '12px',
+  },
+  quickActionBtn: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    padding: '16px',
+    borderRadius: '16px',
+    border: '1px solid #C8E6C9',
+    backgroundColor: '#FFFFFF',
     cursor: 'pointer',
+    transition: 'all 0.2s',
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 12px rgba(46, 125, 50, 0.03)',
+    }
+  },
+  quickIconCircle: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickActionLabel: {
+    fontSize: '0.8rem',
+    fontWeight: '800',
+    color: '#111827',
+  },
+  quoteBanner: {
+    backgroundColor: '#E8F5E9',
+    borderRadius: '20px',
+    padding: '20px 24px',
+    boxShadow: '0 4px 18px rgba(46, 125, 50, 0.02)',
+    border: '1px solid #C8E6C9',
+  },
+  quoteLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  sproutGroup: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    flexShrink: 0,
+  },
+  quoteText: {
+    fontSize: '0.88rem',
+    color: '#0F5132',
+    lineHeight: '1.4',
+    fontWeight: '700',
+    margin: 0,
   }
 };

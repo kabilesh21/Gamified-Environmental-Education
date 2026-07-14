@@ -2,6 +2,9 @@ package com.ecoverse.demo.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,9 @@ public class EmailService {
     private static final String SENDER_EMAIL = "postmanmail21@gmail.com";
     private static final String SENDER_NAME = "Greenizo Team";
 
+    @Autowired
+    private JavaMailSender mailSender;
+
     @Async
     public void sendOtpEmail(String toEmail, String otp) {
         String subject = "Greenizo Verification Code: " + otp;
@@ -34,45 +40,74 @@ public class EmailService {
                 "Best regards,\n" +
                 "The Greenizo Team";
 
-        try {
-            URL url = new URL("https://api.brevo.com/v3/smtp/email");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("api-key", BREVO_API_KEY);
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
-            conn.setDoOutput(true);
+        boolean sent = false;
 
-            // Escape backslashes, double quotes, and newlines for clean JSON formatting
-            String escapedContent = content
-                    .replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
-                    .replace("\r", "");
+        // 1. Try Brevo API if key is configured
+        if (BREVO_API_KEY != null && !BREVO_API_KEY.trim().isEmpty()) {
+            try {
+                logger.info("Attempting to send OTP email to {} via Brevo...", toEmail);
+                URL url = new URL("https://api.brevo.com/v3/smtp/email");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("api-key", BREVO_API_KEY);
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                conn.setDoOutput(true);
 
-            String jsonPayload = "{"
-                    + "\"sender\":{\"name\":\"" + SENDER_NAME + "\",\"email\":\"" + SENDER_EMAIL + "\"},"
-                    + "\"to\":[{\"email\":\"" + toEmail + "\"}],"
-                    + "\"subject\":\"" + subject + "\","
-                    + "\"textContent\":\"" + escapedContent + "\""
-                    + "}";
+                String escapedContent = content
+                        .replace("\\", "\\\\")
+                        .replace("\"", "\\\"")
+                        .replace("\n", "\\n")
+                        .replace("\r", "");
 
-            try (OutputStream os = conn.getOutputStream()) {
-                byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
+                String jsonPayload = "{"
+                        + "\"sender\":{\"name\":\"" + SENDER_NAME + "\",\"email\":\"" + SENDER_EMAIL + "\"},"
+                        + "\"to\":[{\"email\":\"" + toEmail + "\"}],"
+                        + "\"subject\":\"" + subject + "\","
+                        + "\"textContent\":\"" + escapedContent + "\""
+                        + "}";
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                }
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode >= 200 && responseCode < 300) {
+                    logger.info("OTP verification email successfully sent via Brevo to {}", toEmail);
+                    sent = true;
+                } else {
+                    logger.warn("Brevo API returned error status: {}.", responseCode);
+                }
+            } catch (Exception e) {
+                logger.warn("Could not send email via Brevo API: {}", e.getMessage());
             }
+        } else {
+            logger.info("Brevo API key is not configured. Skipping Brevo.");
+        }
 
-            int responseCode = conn.getResponseCode();
-            if (responseCode >= 200 && responseCode < 300) {
-                logger.info("OTP verification email successfully sent via Brevo to {}", toEmail);
-            } else {
-                logger.warn("Brevo API returned error status: {}. Falling back to console logging.", responseCode);
-                printFallbackOtp(toEmail, subject, otp, content);
+        // 2. Try Spring Mail as a fallback/alternative
+        if (!sent) {
+            try {
+                logger.info("Attempting to send OTP email to {} via Spring Mail...", toEmail);
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(SENDER_EMAIL);
+                message.setTo(toEmail);
+                message.setSubject(subject);
+                message.setText(content);
+                mailSender.send(message);
+                logger.info("OTP verification email successfully sent via Spring Mail to {}", toEmail);
+                sent = true;
+            } catch (Exception e) {
+                logger.warn("Could not send email via Spring Mail (Reason: {}).", e.getMessage());
             }
-        } catch (Exception e) {
-            logger.warn("Could not send email via Brevo API (Reason: {}). Falling back to console logging.", e.getMessage());
+        }
+
+        // 3. Fallback to console logging if all failed
+        if (!sent) {
+            logger.warn("All email delivery methods failed. Falling back to console logging.");
             printFallbackOtp(toEmail, subject, otp, content);
         }
     }

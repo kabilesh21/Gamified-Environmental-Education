@@ -36,37 +36,11 @@ function ProtectedLayout({ sidebarOpen, setSidebarOpen }) {
       <div className="app-container">
         <EcoBackground />
         
-        {/* Global floating hamburger menu button visible when sidebar is closed */}
-        {!sidebarOpen && (
-          <button
-            onClick={() => setSidebarOpen(true)}
-            style={{
-              position: 'fixed',
-              top: '20px',
-              left: '20px',
-              zIndex: 1000,
-              backgroundColor: '#FFFFFF',
-              border: '1px solid rgba(0,0,0,0.06)',
-              borderRadius: '8px',
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
-            }}
-            title="Open Sidebar"
-          >
-            <Menu size={22} color="#1b4d2c" />
-          </button>
-        )}
-
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <Navbar sidebarOpen={sidebarOpen} />
+          <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           <main className="main-content" style={{
-            marginLeft: sidebarOpen ? '240px' : '0px',
+            marginLeft: sidebarOpen ? '260px' : '0px',
             padding: '24px',
             transition: 'all 0.3s ease'
           }}>
