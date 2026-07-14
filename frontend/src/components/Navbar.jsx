@@ -67,7 +67,7 @@ export default function Navbar({ sidebarOpen, setSidebarOpen }) {
           id: 'streak',
           type: 'streak',
           title: 'Daily Streak Reminder',
-          desc: `You are on a ${user.streak || 7}-day streak! Log in tomorrow to keep it going! 🔥`,
+          desc: `You are on a ${user.streak ?? 0}-day streak! Log in tomorrow to keep it going! 🔥`,
           path: '/challenges'
         });
 

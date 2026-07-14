@@ -47,6 +47,9 @@ public class CourseService {
     @Autowired
     private WeeklyMissionService weeklyMissionService;
 
+    @Autowired
+    private DashboardService dashboardService;
+
     public List<CourseResponse> getAllCourses(User user) {
         List<Course> courses = courseRepository.findAll();
         return courses.stream()
@@ -111,6 +114,9 @@ public class CourseService {
         // Award +15 Eco Coins for lesson completion
         user.setCoins(user.getCoins() + 15);
         userRepository.save(user);
+
+        // Log activity
+        dashboardService.logActivity(user, "Completed lesson: " + lesson.getTitle(), "+10 XP", "LESSON");
 
         // Update Weekly Mission for MODULE and XP
         weeklyMissionService.incrementProgress(user, "MODULE", 1);
@@ -215,6 +221,9 @@ public class CourseService {
                 // Earn quiz Eco Coins (+50 Coins)
                 user.setCoins(user.getCoins() + 50);
                 userRepository.save(user);
+
+                // Log activity
+                dashboardService.logActivity(user, "Completed quiz on " + quiz.getCourse().getTitle(), "+" + xpEarned + " XP", "QUIZ");
 
                 // Update Weekly Mission for QUIZ and XP
                 weeklyMissionService.incrementProgress(user, "QUIZ", 1);
@@ -332,11 +341,13 @@ public class CourseService {
             user.setCurrentStreak(1);
             user.setLastActiveDate(today);
             achievementService.awardXpAndCheckLevel(user, 15); // Daily activity reward
+            dashboardService.logActivity(user, "First login to Ecoversee", "+15 XP", "STREAK");
         } else if (lastActive.equals(today.minusDays(1))) {
             int newStreak = user.getCurrentStreak() + 1;
             user.setCurrentStreak(newStreak);
             user.setLastActiveDate(today);
             achievementService.awardXpAndCheckLevel(user, 15); // Streak login bonus
+            dashboardService.logActivity(user, "Daily login streak continued", "+15 XP", "STREAK");
 
             if (newStreak >= 7) {
                 achievementService.unlockAchievement(user, "STREAK_7");
@@ -346,6 +357,7 @@ public class CourseService {
             user.setCurrentStreak(1);
             user.setLastActiveDate(today);
             achievementService.awardXpAndCheckLevel(user, 15);
+            dashboardService.logActivity(user, "Daily login", "+15 XP", "STREAK");
         }
 
         userRepository.save(user);

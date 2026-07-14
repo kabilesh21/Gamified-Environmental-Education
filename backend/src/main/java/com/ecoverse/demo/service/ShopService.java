@@ -26,6 +26,9 @@ public class ShopService {
     @Autowired
     private WeeklyMissionService weeklyMissionService;
 
+    @Autowired
+    private DashboardService dashboardService;
+
     @Transactional
     public void purchaseItem(User user, String itemKey) {
         ShopItem shopItem = shopItemRepository.findByItemKey(itemKey)
@@ -66,5 +69,8 @@ public class ShopService {
 
         // Increment weekly mission progress
         weeklyMissionService.incrementProgress(user, "SHOP", 1);
+
+        // Log activity
+        dashboardService.logActivity(user, "Purchased " + shopItem.getName() + " from Reward Shop", "-" + shopItem.getPrice() + " Coins", "SHOP");
     }
 }

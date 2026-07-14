@@ -56,7 +56,7 @@ export default function Sidebar({ isOpen, onClose }) {
           style={({ isActive }) => (isActive ? { ...styles.link, ...styles.linkActive } : styles.link)}
         >
           <ClipboardCheck size={18} style={styles.icon} />
-          <span style={styles.linkText}>Quizzes</span>
+          <span style={styles.linkText}>Activities</span>
         </NavLink>
 
         <NavLink

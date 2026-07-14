@@ -13,12 +13,16 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
-    level: 4,
-    xp: 1250,
-    completedCoursesCount: 12,
-    unlockedBadgesCount: 3,
+    level: 1,
+    xp: 0,
+    completedCoursesCount: 0,
+    unlockedBadgesCount: 0,
+    totalCoursesCount: 0,
+    totalQuizzesCount: 0,
   });
 
+  const [courses, setCourses] = useState([]);
+  const [recentActivities, setRecentActivities] = useState([]);
   const [treeInfo, setTreeInfo] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [activeEvents, setActiveEvents] = useState([]);
@@ -74,11 +78,25 @@ export default function Dashboard() {
         const statsRes = await axios.get('/api/dashboard/stats').catch(err => console.warn(err));
         if (statsRes && statsRes.data) {
           setStats({
-            level: statsRes.data.level || 4,
-            xp: statsRes.data.xp || 1250,
-            completedCoursesCount: statsRes.data.completedCoursesCount || 12,
-            unlockedBadgesCount: statsRes.data.unlockedBadgesCount || 3,
+            level: statsRes.data.level ?? 1,
+            xp: statsRes.data.xp ?? 0,
+            completedCoursesCount: statsRes.data.completedCoursesCount ?? 0,
+            unlockedBadgesCount: statsRes.data.unlockedBadgesCount ?? 0,
+            totalCoursesCount: statsRes.data.totalCoursesCount ?? 0,
+            totalQuizzesCount: statsRes.data.totalQuizzesCount ?? 0,
           });
+        }
+
+        // Fetch courses for learning progress
+        const coursesRes = await axios.get('/api/courses').catch(err => console.warn(err));
+        if (coursesRes && coursesRes.data) {
+          setCourses(coursesRes.data);
+        }
+
+        // Fetch recent activities
+        const activitiesRes = await axios.get('/api/dashboard/activities').catch(err => console.warn(err));
+        if (activitiesRes && activitiesRes.data) {
+          setRecentActivities(activitiesRes.data);
         }
 
         // Fetch virtual tree info
@@ -120,9 +138,46 @@ export default function Dashboard() {
     fetchDashboardData();
   }, []);
 
-  const displayName = user?.fullName || 'Kabilesh M';
-  const displayXp = user?.xp || stats.xp;
-  const displayLevel = user?.level || stats.level;
+  const displayName = user?.fullName || 'User';
+  const displayXp = user?.xp ?? stats.xp ?? 0;
+  const displayLevel = user?.level ?? stats.level ?? 1;
+
+  const formatTimeAgo = (timestampStr) => {
+    if (!timestampStr) return '';
+    const now = new Date(currentTime);
+    const time = new Date(timestampStr);
+    const diffMs = now - time;
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHrs < 24) return `${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
+    if (diffDays === 1) return 'Yesterday';
+    return `${diffDays} days ago`;
+  };
+
+  const getActivityIcon = (type) => {
+    const size = 16;
+    switch (type?.toUpperCase()) {
+      case 'QUIZ':
+        return { icon: <Trophy size={size} color="#E53E3E" />, bg: '#FFF5F5' };
+      case 'BADGE':
+        return { icon: <Award size={size} color="#0284C7" />, bg: '#E0F2FE' };
+      case 'LESSON':
+        return { icon: <BookOpen size={size} color="#9F7AEA" />, bg: '#FAF5FF' };
+      case 'TREE':
+        return { icon: <Leaf size={size} color="#2E7D32" />, bg: '#E6F4EA' };
+      case 'SHOP':
+        return { icon: <Gift size={size} color="#3182CE" />, bg: '#EBF8FF' };
+      case 'STREAK':
+      case 'LOGIN':
+        return { icon: <Flame size={size} color="#D97706" />, bg: '#FEF3C7' };
+      default:
+        return { icon: <CheckCircle size={size} color="#2E7D32" />, bg: '#EAF5EC' };
+    }
+  };
 
   const isEventCompleted = (event) => {
     return userBadges.some(b => b.name.toLowerCase() === event.badgeReward.toLowerCase());
@@ -212,9 +267,14 @@ export default function Dashboard() {
 
   const currentLeaderboard = getLeaderboardList();
 
+  const enrolledCourses = courses.filter(c => c.enrolled);
+  const overallProgress = enrolledCourses.length > 0
+    ? Math.round(enrolledCourses.reduce((sum, c) => sum + (c.progressPercentage || 0), 0) / enrolledCourses.length)
+    : 0;
+
   const radius = 45;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (60 / 100) * circumference;
+  const strokeDashoffset = circumference - (overallProgress / 100) * circumference;
 
   return (
     <div style={styles.dashboardContainer}>
@@ -233,11 +293,11 @@ export default function Dashboard() {
         <div style={styles.heroCenter}>
           <div style={styles.miniStatBadge}>
             <span style={styles.miniStatLabel}>Daily Streak</span>
-            <span style={styles.miniStatVal}>🔥 {user?.streak || 7} Days</span>
+            <span style={styles.miniStatVal}>🔥 {user?.streak ?? 0} Days</span>
           </div>
           <div style={styles.miniStatBadge}>
             <span style={styles.miniStatLabel}>Eco Coins</span>
-            <span style={styles.miniStatVal}>🪙 {user?.coins || 120}</span>
+            <span style={styles.miniStatVal}>🪙 {user?.coins ?? 0}</span>
           </div>
           <div style={styles.miniStatBadge}>
             <span style={styles.miniStatLabel}>Current XP</span>
@@ -288,11 +348,11 @@ export default function Dashboard() {
           </div>
           <div style={{ ...styles.metricDetails, width: '100%' }}>
             <span style={styles.metricLabel}>Modules Completed</span>
-            <span style={styles.metricValue}>{stats.completedCoursesCount} / 20</span>
+            <span style={styles.metricValue}>{stats.completedCoursesCount} / {stats.totalCoursesCount || 20}</span>
             <div style={styles.progressTrack}>
-              <div style={{ ...styles.progressBar, width: `${(stats.completedCoursesCount / 20) * 100}%`, backgroundColor: '#3182CE' }} />
+              <div style={{ ...styles.progressBar, width: `${stats.totalCoursesCount > 0 ? (stats.completedCoursesCount / stats.totalCoursesCount) * 100 : 0}%`, backgroundColor: '#3182CE' }} />
             </div>
-            <span style={styles.metricSubtext}>{Math.round((stats.completedCoursesCount / 20) * 100)}% Completed</span>
+            <span style={styles.metricSubtext}>{stats.totalCoursesCount > 0 ? Math.round((stats.completedCoursesCount / stats.totalCoursesCount) * 100) : 0}% Completed</span>
           </div>
         </div>
 
@@ -303,8 +363,8 @@ export default function Dashboard() {
           </div>
           <div style={styles.metricDetails}>
             <span style={styles.metricLabel}>Quizzes Completed</span>
-            <span style={styles.metricValue}>{stats.completedCoursesCount - 4 > 0 ? stats.completedCoursesCount - 4 : 8} / 15</span>
-            <span style={styles.metricSubtext}>Great Job! 🎉</span>
+            <span style={styles.metricValue}>{stats.completedCoursesCount} / {stats.totalQuizzesCount || 15}</span>
+            <span style={styles.metricSubtext}>{stats.completedCoursesCount > 0 ? "Great Job! 🎉" : "Not yet completed 🌱"}</span>
           </div>
         </div>
 
@@ -419,7 +479,7 @@ export default function Dashboard() {
                   transform="rotate(-90 55 55)"
                 />
                 <text x="50%" y="45%" textAnchor="middle" dominantBaseline="middle" style={styles.gaugeText}>
-                  60%
+                  {overallProgress}%
                 </text>
                 <text x="50%" y="65%" textAnchor="middle" dominantBaseline="middle" style={styles.gaugeLabel}>
                   Overall
@@ -432,45 +492,26 @@ export default function Dashboard() {
 
             {/* List of Topic Metrics */}
             <div style={styles.topicsList}>
-              <div style={styles.topicItem}>
-                <div style={styles.topicHeader}>
-                  <span style={styles.topicName}>Air Pollution</span>
-                  <span style={styles.topicPercent}>100%</span>
+              {courses.slice(0, 4).map((c, idx) => {
+                const colors = ['#48BB78', '#4299E1', '#ED8936', '#9F7AEA'];
+                const progressPct = c.enrolled ? Math.round(c.progressPercentage) : 0;
+                return (
+                  <div key={c.id || idx} style={styles.topicItem}>
+                    <div style={styles.topicHeader}>
+                      <span style={styles.topicName}>{c.title}</span>
+                      <span style={styles.topicPercent}>{c.enrolled ? `${progressPct}%` : 'Not Enrolled'}</span>
+                    </div>
+                    <div style={styles.topicTrack}>
+                      <div style={{ ...styles.topicBar, width: `${progressPct}%`, backgroundColor: colors[idx % colors.length] }} />
+                    </div>
+                  </div>
+                );
+              })}
+              {courses.length === 0 && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
+                  <span style={{ fontSize: '14px', color: '#718096' }}>No courses loaded yet. 🌱</span>
                 </div>
-                <div style={styles.topicTrack}>
-                  <div style={{ ...styles.topicBar, width: '100%', backgroundColor: '#48BB78' }} />
-                </div>
-              </div>
-
-              <div style={styles.topicItem}>
-                <div style={styles.topicHeader}>
-                  <span style={styles.topicName}>Water Conservation</span>
-                  <span style={styles.topicPercent}>75%</span>
-                </div>
-                <div style={styles.topicTrack}>
-                  <div style={{ ...styles.topicBar, width: '75%', backgroundColor: '#4299E1' }} />
-                </div>
-              </div>
-
-              <div style={styles.topicItem}>
-                <div style={styles.topicHeader}>
-                  <span style={styles.topicName}>Waste Management</span>
-                  <span style={styles.topicPercent}>50%</span>
-                </div>
-                <div style={styles.topicTrack}>
-                  <div style={{ ...styles.topicBar, width: '50%', backgroundColor: '#ED8936' }} />
-                </div>
-              </div>
-
-              <div style={styles.topicItem}>
-                <div style={styles.topicHeader}>
-                  <span style={styles.topicName}>Biodiversity</span>
-                  <span style={styles.topicPercent}>25%</span>
-                </div>
-                <div style={styles.topicTrack}>
-                  <div style={{ ...styles.topicBar, width: '25%', backgroundColor: '#9F7AEA' }} />
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -578,83 +619,34 @@ export default function Dashboard() {
             <button onClick={() => navigate('/certificates')} style={styles.viewAllBtn}>View All</button>
           </div>
           <div style={styles.activitiesList}>
-            <div style={styles.activityRow}>
-              <div style={{ ...styles.activityIcon, backgroundColor: '#EAF5EC' }}>
-                <CheckCircle size={16} color="#2E7D32" />
+            {recentActivities.map((act) => {
+              const { icon, bg } = getActivityIcon(act.type);
+              const isNegative = act.xpChange?.startsWith('-');
+              return (
+                <div key={act.id} style={styles.activityRow}>
+                  <div style={{ ...styles.activityIcon, backgroundColor: bg }}>
+                    {icon}
+                  </div>
+                  <div style={styles.activityBody}>
+                    <span style={styles.activityTitle}>{act.title}</span>
+                    <span style={styles.activityTime}>{formatTimeAgo(act.timestamp)}</span>
+                  </div>
+                  <span style={{ 
+                    ...styles.activityPoints, 
+                    color: isNegative ? '#E53E3E' : '#2E7D32' 
+                  }}>
+                    {act.xpChange}
+                  </span>
+                </div>
+              );
+            })}
+            {recentActivities.length === 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', padding: '40px 10px', textAlign: 'center' }}>
+                <span style={{ fontSize: '32px', marginBottom: '10px' }}>🌱</span>
+                <span style={{ fontSize: '14px', color: '#718096', fontWeight: '500' }}>No recent activity yet!</span>
+                <span style={{ fontSize: '12px', color: '#A0AEC0', marginTop: '4px' }}>Complete a lesson, pass a quiz, or nurture your tree to start your eco journey!</span>
               </div>
-              <div style={styles.activityBody}>
-                <span style={styles.activityTitle}>Completed quiz on Air Pollution</span>
-                <span style={styles.activityTime}>2 hours ago</span>
-              </div>
-              <span style={styles.activityPoints}>+50 Points</span>
-            </div>
-
-            <div style={styles.activityRow}>
-              <div style={{ ...styles.activityIcon, backgroundColor: '#E0F2FE' }}>
-                <Award size={16} color="#0284C7" />
-              </div>
-              <div style={styles.activityBody}>
-                <span style={styles.activityTitle}>Earned badge "Water Saver"</span>
-                <span style={styles.activityTime}>Yesterday</span>
-              </div>
-              <span style={styles.activityPoints}>+100 Points</span>
-            </div>
-
-            <div style={styles.activityRow}>
-              <div style={{ ...styles.activityIcon, backgroundColor: '#FAF5FF' }}>
-                <BookOpen size={16} color="#9F7AEA" />
-              </div>
-              <div style={styles.activityBody}>
-                <span style={styles.activityTitle}>Completed module on Recycling</span>
-                <span style={styles.activityTime}>2 days ago</span>
-              </div>
-              <span style={styles.activityPoints}>+75 Points</span>
-            </div>
-
-            <div style={styles.activityRow}>
-              <div style={{ ...styles.activityIcon, backgroundColor: '#FFF5F5' }}>
-                <Trophy size={16} color="#E53E3E" />
-              </div>
-              <div style={styles.activityBody}>
-                <span style={styles.activityTitle}>Reached Level 4</span>
-                <span style={styles.activityTime}>3 days ago</span>
-              </div>
-              <span style={styles.activityPoints}>+200 Points</span>
-            </div>
-
-            {/* Additional Activities */}
-            <div style={styles.activityRow}>
-              <div style={{ ...styles.activityIcon, backgroundColor: '#E6F4EA' }}>
-                <Leaf size={16} color="#2E7D32" />
-              </div>
-              <div style={styles.activityBody}>
-                <span style={styles.activityTitle}>Watered Virtual Tree</span>
-                <span style={styles.activityTime}>4 hours ago</span>
-              </div>
-              <span style={styles.activityPoints}>+15 Points</span>
-            </div>
-
-            <div style={styles.activityRow}>
-              <div style={{ ...styles.activityIcon, backgroundColor: '#FEF3C7' }}>
-                <Flame size={16} color="#D97706" />
-              </div>
-              <div style={styles.activityBody}>
-                <span style={styles.activityTitle}>Answered Sunlight Trivia correctly</span>
-                <span style={styles.activityTime}>Today</span>
-              </div>
-              <span style={styles.activityPoints}>+50 Points</span>
-            </div>
-
-            <div style={styles.activityRow}>
-              <div style={{ ...styles.activityIcon, backgroundColor: '#EBF8FF' }}>
-                <Gift size={16} color="#3182CE" />
-              </div>
-              <div style={styles.activityBody}>
-                <span style={styles.activityTitle}>Purchased Sprout from Reward Shop</span>
-                <span style={styles.activityTime}>Yesterday</span>
-              </div>
-              <span style={{ ...styles.activityPoints, color: '#E53E3E' }}>-30 Coins</span>
-            </div>
+            )}
           </div>
         </div>
 

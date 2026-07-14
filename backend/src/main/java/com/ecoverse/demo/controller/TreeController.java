@@ -4,6 +4,7 @@ import com.ecoverse.demo.entity.User;
 import com.ecoverse.demo.repository.UserRepository;
 import com.ecoverse.demo.security.UserPrincipal;
 import com.ecoverse.demo.service.TreeService;
+import com.ecoverse.demo.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +23,9 @@ public class TreeController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DashboardService dashboardService;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getTreeProgress(@AuthenticationPrincipal UserPrincipal principal) {
@@ -45,6 +49,9 @@ public class TreeController {
                 user.setLevel(calculatedLevel);
             }
             userRepository.save(user);
+            
+            // Log activity
+            dashboardService.logActivity(user, "Watered Virtual Tree", "-5 Coins", "TREE");
             
             Map<String, Object> progress = treeService.getTreeProgress(user);
             progress.put("coins", user.getCoins());
@@ -72,6 +79,9 @@ public class TreeController {
             }
             userRepository.save(user);
             
+            // Log activity
+            dashboardService.logActivity(user, "Fertilized Virtual Tree", "-10 Coins", "TREE");
+            
             Map<String, Object> progress = treeService.getTreeProgress(user);
             progress.put("coins", user.getCoins());
             progress.put("xp", user.getXp());
@@ -93,6 +103,9 @@ public class TreeController {
                 user.setLevel(calculatedLevel);
             }
             userRepository.save(user);
+            
+            // Log activity
+            dashboardService.logActivity(user, "Answered Sunlight Trivia correctly", "+50 XP", "TREE");
             
             Map<String, Object> progress = treeService.getTreeProgress(user);
             progress.put("coins", user.getCoins());

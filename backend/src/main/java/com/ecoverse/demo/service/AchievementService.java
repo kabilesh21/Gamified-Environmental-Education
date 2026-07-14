@@ -26,6 +26,9 @@ public class AchievementService {
     @Autowired
     private UserBadgeRepository userBadgeRepository;
 
+    @Autowired
+    private DashboardService dashboardService;
+
     @Transactional
     public boolean unlockAchievement(User user, String key) {
         // If user already has this achievement, do nothing
@@ -49,6 +52,7 @@ public class AchievementService {
 
         // Award XP and calculate Level
         awardXpAndCheckLevel(user, achievement.getXpReward());
+        dashboardService.logActivity(user, "Unlocked achievement: " + achievement.getName(), "+" + achievement.getXpReward() + " XP", "ACHIEVEMENT");
         return true;
     }
 
@@ -74,6 +78,7 @@ public class AchievementService {
         
         // Unlocking a badge also gives 50 XP
         awardXpAndCheckLevel(user, 50);
+        dashboardService.logActivity(user, "Earned badge \"" + badge.getName() + "\"", "+50 XP", "BADGE");
         return true;
     }
 

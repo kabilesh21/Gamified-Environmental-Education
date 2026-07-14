@@ -16,4 +16,6 @@ public class DashboardStatsResponse {
     private double co2ReducedKg;    // Simulated: xp / 50.0
     private long completedCoursesCount;
     private long unlockedBadgesCount;
+    private long totalCoursesCount;
+    private long totalQuizzesCount;
 }
