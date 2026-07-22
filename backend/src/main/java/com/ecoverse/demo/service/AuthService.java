@@ -170,6 +170,7 @@ public class AuthService {
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setEnabled(true);
         user.setOtp(null);
         user.setOtpExpiry(null);
         userRepository.save(user);

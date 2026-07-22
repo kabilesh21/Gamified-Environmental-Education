@@ -74,8 +74,27 @@ export default function Dashboard() {
         setLoading(true);
         await refreshUserData().catch(err => console.warn("Profile stats refresh failed:", err));
         
-        // Fetch dashboard stats
-        const statsRes = await axios.get('/api/dashboard/stats').catch(err => console.warn(err));
+        // Fetch remaining resources concurrently in parallel
+        const [
+          statsRes,
+          coursesRes,
+          activitiesRes,
+          treeRes,
+          lbRes,
+          eventsRes,
+          missionsRes,
+          profileRes
+        ] = await Promise.all([
+          axios.get('/api/dashboard/stats').catch(err => { console.warn(err); return null; }),
+          axios.get('/api/courses').catch(err => { console.warn(err); return null; }),
+          axios.get('/api/dashboard/activities').catch(err => { console.warn(err); return null; }),
+          axios.get('/api/tree').catch(err => { console.warn(err); return null; }),
+          axios.get('/api/leaderboard').catch(err => { console.warn(err); return null; }),
+          axios.get('/api/events/active').catch(err => { console.warn(err); return null; }),
+          axios.get('/api/missions').catch(err => { console.warn(err); return null; }),
+          axios.get('/api/profile').catch(err => { console.warn(err); return null; })
+        ]);
+
         if (statsRes && statsRes.data) {
           setStats({
             level: statsRes.data.level ?? 1,
@@ -87,44 +106,30 @@ export default function Dashboard() {
           });
         }
 
-        // Fetch courses for learning progress
-        const coursesRes = await axios.get('/api/courses').catch(err => console.warn(err));
         if (coursesRes && coursesRes.data) {
           setCourses(coursesRes.data);
         }
 
-        // Fetch recent activities
-        const activitiesRes = await axios.get('/api/dashboard/activities').catch(err => console.warn(err));
         if (activitiesRes && activitiesRes.data) {
           setRecentActivities(activitiesRes.data);
         }
 
-        // Fetch virtual tree info
-        const treeRes = await axios.get('/api/tree').catch(err => console.warn(err));
         if (treeRes && treeRes.data) {
           setTreeInfo(treeRes.data);
         }
 
-        // Fetch leaderboard
-        const lbRes = await axios.get('/api/leaderboard').catch(err => console.warn(err));
         if (lbRes && lbRes.data) {
           setLeaderboard(lbRes.data.slice(0, 5));
         }
 
-        // Fetch active events
-        const eventsRes = await axios.get('/api/events/active').catch(err => console.warn(err));
         if (eventsRes && eventsRes.data) {
           setActiveEvents(eventsRes.data);
         }
 
-        // Fetch missions
-        const missionsRes = await axios.get('/api/missions').catch(err => console.warn(err));
         if (missionsRes && missionsRes.data) {
           setMissions(missionsRes.data);
         }
 
-        // Fetch user badges
-        const profileRes = await axios.get('/api/profile').catch(err => console.warn(err));
         if (profileRes && profileRes.data) {
           setUserBadges(profileRes.data.unlockedBadges || []);
         }
