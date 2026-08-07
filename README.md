@@ -14,7 +14,6 @@ Ecoverse is a gamified environmental education web platform that bridges the gap
 
 ---
 
-
 ## 🚀 Key Features
 
 ### 🔐 1. Authentication & Security
