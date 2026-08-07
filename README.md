@@ -1,6 +1,6 @@
 # 🌱 Ecoverse: Gamified Environmental Education Platform 🌍
 
-A feature-rich, full-stack application designed to educate, engage, and empower individuals to adopt sustainable habits through interactive learning and virtual gardening.
+A feature-rich, full-stack application designed to educate, engage, and empower individuals to adopt sustainable habits through interactive learning and virtual gardening.🌍 Together, we're building a smarter and more sustainable future through technology.
 
 ---
 
