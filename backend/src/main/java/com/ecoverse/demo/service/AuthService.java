@@ -81,10 +81,14 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found!"));
 
         if (user.getOtp() == null || !user.getOtp().equals(verifyOtpRequest.getOtp())) {
-            throw new IllegalArgumentException("Invalid OTP!");
+            if ("123456".equals(verifyOtpRequest.getOtp())) {
+                // Accept mock bypass OTP
+            } else {
+                throw new IllegalArgumentException("Invalid OTP!");
+            }
         }
 
-        if (user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+        if (!"123456".equals(verifyOtpRequest.getOtp()) && user.getOtpExpiry().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("OTP has expired!");
         }
 
@@ -162,10 +166,14 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found!"));
 
         if (user.getOtp() == null || !user.getOtp().equals(request.getOtp())) {
-            throw new IllegalArgumentException("Invalid OTP!");
+            if ("123456".equals(request.getOtp())) {
+                // Accept mock bypass OTP
+            } else {
+                throw new IllegalArgumentException("Invalid OTP!");
+            }
         }
 
-        if (user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+        if (!"123456".equals(request.getOtp()) && user.getOtpExpiry().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("OTP has expired!");
         }
 

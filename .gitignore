@@ -2,3 +2,5 @@
 *.pptx
 generate_ppt.py
 convert_image_to_pdf.py
+generate_pechacks_pdf.py
+generate_pechacks_ppt.py
