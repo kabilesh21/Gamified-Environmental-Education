@@ -20,7 +20,9 @@ public class EmailService {
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     private static final String BREVO_API_KEY = System.getenv("BREVO_API_KEY");
-    private static final String SENDER_EMAIL = "postmanmail21@gmail.com";
+    private static final String SENDER_EMAIL = System.getenv("SENDER_EMAIL") != null && !System.getenv("SENDER_EMAIL").trim().isEmpty()
+            ? System.getenv("SENDER_EMAIL")
+            : "kabileshclg0678@gmail.com";
     private static final String SENDER_NAME = "Greenizo Team";
 
     @Autowired
